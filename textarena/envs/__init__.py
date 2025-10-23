@@ -485,6 +485,7 @@ register_with_versions(id="SecretMafia-v0", entry_point="textarena.envs.SecretMa
 register_with_versions(id="Avalon-v0", entry_point="textarena.envs.Avalon.env:AvalonEnv", wrappers={"default": CONVERSATIONAL_WRAPPERS, "-train": CONVERSATIONAL_WRAPPERS}, discussion_rounds=1)
 
 
+register_with_versions(id="Werewolf-v0", entry_point="textarena.envs.Werewolf.env:WerewolfEnv", wrappers={"default": CONVERSATIONAL_WRAPPERS, "-train": CONVERSATIONAL_WRAPPERS}, werewolf_ratio=0.33)
 
 
 
