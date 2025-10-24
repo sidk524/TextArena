@@ -456,10 +456,10 @@ class AvalonEnv(ta.Env):
             self.player_roles[pid] = r_name
             self.roles[pid] = Role.create(r_name)
         
-        print(f"DEBUG: Game setup - Players: {num_players}, Roles: {self.player_roles}")
-        good_players = [pid for pid, role in self.player_roles.items() if role not in EVIL_NAMES]
-        evil_players = [pid for pid, role in self.player_roles.items() if role in EVIL_NAMES]
-        print(f"DEBUG: Good players: {good_players}, Evil players: {evil_players}")
+        # print(f"DEBUG: Game setup - Players: {num_players}, Roles: {self.player_roles}")
+        # good_players = [pid for pid, role in self.player_roles.items() if role not in EVIL_NAMES]
+        # evil_players = [pid for pid, role in self.player_roles.items() if role in EVIL_NAMES]
+        # print(f"DEBUG: Good players: {good_players}, Evil players: {evil_players}")
 
     def _prompt(self, player_id: int, game_state: dict) -> str:
         role_obj: Role = self.roles[player_id]
@@ -499,7 +499,7 @@ class AvalonEnv(ta.Env):
 
         # Advance to next phase
         next_phase = self._compute_next_phase()
-        print(f"DEBUG: Phase transition to {next_phase.value}")
+        # print(f"DEBUG: Phase transition to {next_phase.value}")
         self.phase = next_phase
         self.state.game_state["phase"] = self.phase
         self._render_game_state()
@@ -593,7 +593,7 @@ class AvalonEnv(ta.Env):
                 raise RuntimeError("Unknown phase")
 
     def _handle_discussion(self, pid: int, action: str):
-        print(f"DEBUG: Player {pid} says: \"{action}\"")
+        # print(f"DEBUG: Player {pid} says: \"{action}\"")
         self.state.add_observation(from_id=pid, message=action, observation_type=ta.ObservationType.PLAYER_ACTION)
     
     def _handle_team_proposal(self, pid: int, action: str):
@@ -627,7 +627,7 @@ class AvalonEnv(ta.Env):
             team_proposal = list(range(team_size)) 
 
         self.state.game_state["team_proposal"] = team_proposal
-        print(f"DEBUG: Leader {pid} proposes team: {team_proposal}")
+        # print(f"DEBUG: Leader {pid} proposes team: {team_proposal}")
         self.state.add_observation(from_id=pid, message=action, observation_type=ta.ObservationType.PLAYER_ACTION)
     
     def _record_vote(self, pid: int, action: str):
@@ -640,7 +640,7 @@ class AvalonEnv(ta.Env):
             vote = DEFAULT_VOTE
 
         self.state.game_state["votes"][pid] = vote
-        print(f"DEBUG: Player {pid} votes: {vote.upper()}")
+        # print(f"DEBUG: Player {pid} votes: {vote.upper()}")
         self.state.add_observation(from_id=pid, message=action, observation_type=ta.ObservationType.PLAYER_ACTION)
     
     def _record_mission_action(self, pid: int, action: str):
@@ -653,7 +653,7 @@ class AvalonEnv(ta.Env):
             action = DEFAULT_MISSION_ACTION
 
         self.state.game_state["mission_actions"][pid] = action
-        print(f"DEBUG: Player {pid} mission action: {action.upper()}")
+        # print(f"DEBUG: Player {pid} mission action: {action.upper()}")
     
     def _record_merlin_guess(self, pid: int, guess: str):
         guess = AvalonParser.parse_merlin_guess(guess)
@@ -665,7 +665,7 @@ class AvalonEnv(ta.Env):
             guess = random.randint(0, self.state.num_players - 1)
 
         self.state.game_state["merlin_guesses"][pid] = guess
-        print(f"DEBUG: Evil Player {pid} guesses Merlin is Player {guess}")
+        # print(f"DEBUG: Evil Player {pid} guesses Merlin is Player {guess}")
 
     def _inc_consecutive_failed_team_proposals(self):
         self.state.game_state["consecutive_failed_team_proposals"] += 1
@@ -678,15 +678,15 @@ class AvalonEnv(ta.Env):
         approve_count = sum(1 for v in votes.values() if v == "approve")
         reject_count = len(votes) - approve_count
         
-        print(f"DEBUG: Vote results - Approve: {approve_count}, Reject: {reject_count}")
+        # print(f"DEBUG: Vote results - Approve: {approve_count}, Reject: {reject_count}")
         
         if not vote_passed:
             self._inc_consecutive_failed_team_proposals()
-            print(f"DEBUG: Team proposal REJECTED - consecutive failures: {self.state.game_state['consecutive_failed_team_proposals']}")
+            # print(f"DEBUG: Team proposal REJECTED - consecutive failures: {self.state.game_state['consecutive_failed_team_proposals']}")
             self.state.add_observation(message="No consensus - the team proposal was not passed.", observation_type=ta.ObservationType.GAME_MESSAGE)
             return
         self.state.game_state["consecutive_failed_team_proposals"] = 0
-        print(f"DEBUG: Team proposal APPROVED")
+        # print(f"DEBUG: Team proposal APPROVED")
     
     def _is_mission_success(self) -> bool:
         return is_mission_success(self.state.game_state["mission_actions"])
@@ -704,16 +704,16 @@ class AvalonEnv(ta.Env):
         mission_actions = self.state.game_state["mission_actions"].copy()
         self.state.game_state["mission_actions"].clear()
         
-        print(f"DEBUG: Mission actions: {mission_actions}")
+        # print(f"DEBUG: Mission actions: {mission_actions}")
         
         if success:
             self._inc_mission_successes()
             message = "Mission Succeeded. All actions were success."
-            print(f"DEBUG: Mission SUCCESS - Good wins: {self.state.game_state['mission_successes']}/3")
+            # print(f"DEBUG: Mission SUCCESS - Good wins: {self.state.game_state['mission_successes']}/3")
         else:
             self._inc_mission_failures()
             message = "Mission Failed. At least one action was fail"
-            print(f"DEBUG: Mission FAILED - Evil wins: {self.state.game_state['mission_failures']}/3")
+            # print(f"DEBUG: Mission FAILED - Evil wins: {self.state.game_state['mission_failures']}/3")
         self.state.add_observation(message=message, observation_type=ta.ObservationType.GAME_MESSAGE)
         self._inc_leader()
 
@@ -722,8 +722,8 @@ class AvalonEnv(ta.Env):
         merlin_pid = self.state.game_state["role_pids"][MERLIN_NAME]
         guesses = self.state.game_state["merlin_guesses"]
         
-        print(f"DEBUG: Merlin guesses: {guesses}")
-        print(f"DEBUG: Actual Merlin is Player {merlin_pid}, Evil guessed Player {target}")
+        # print(f"DEBUG: Merlin guesses: {guesses}")
+        # print(f"DEBUG: Actual Merlin is Player {merlin_pid}, Evil guessed Player {target}")
         
         if target is None:
             self._set_good_winners(reason="No merlin guesses found. Good automatically wins.")
@@ -740,12 +740,12 @@ class AvalonEnv(ta.Env):
 
     def _set_good_winners(self, reason: str):
         pids = self._good_pids()
-        print(f"DEBUG: GAME OVER - Good wins! Good players: {pids}")
+        # print(f"DEBUG: GAME OVER - Good wins! Good players: {pids}")
         self.state.set_winners(player_ids=pids, reason=reason + "\nGood wins!")
 
     def _set_evil_winners(self, reason: str):
         pids = self._evil_pids()
-        print(f"DEBUG: GAME OVER - Evil wins! Evil players: {pids}")
+        # print(f"DEBUG: GAME OVER - Evil wins! Evil players: {pids}")
         self.state.set_winners(player_ids=pids, reason=reason + "\nEvil wins!")
     
     def _set_guess_merlin_phase(self):

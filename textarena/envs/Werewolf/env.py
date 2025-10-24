@@ -432,7 +432,7 @@ class WerewolfEnv(ta.Env):
     def _handle_werewolf_discussion(self, pid: int, action: str):
         # Send message from current werewolf to all other werewolves
         alive_werewolves = [p for p in self.state.game_state["alive_player_ids"] if self.player_roles[p] == WEREWOLF_NAME]
-        print(f"DEBUG: Werewolf {pid} says: \"{action}\"")
+        # print(f"DEBUG: Werewolf {pid} says: \"{action}\"")
         for other_werewolf in alive_werewolves:
             if other_werewolf != pid:  # Don't send to self
                 self.state.add_observation(from_id=pid, to_id=other_werewolf, message=action, observation_type=ta.ObservationType.PLAYER_ACTION)
@@ -459,7 +459,7 @@ class WerewolfEnv(ta.Env):
                 self.state.made_invalid_move = False  # such that we can rotate off the player 
                 return
         self.state.game_state["revealed_player_ids"].append(target)
-        print(f"DEBUG: Seer {pid} reveals Player {target}")
+        # print(f"DEBUG: Seer {pid} reveals Player {target}")
 
     def _handle_witch_choice(self, pid: int, action: str):
         action_type, target = WerewolfParser.parse_witch_choice(action)
@@ -482,7 +482,7 @@ class WerewolfEnv(ta.Env):
             self.state.game_state["num_cures"] -= 1
             self.state.game_state["cure_used"] = True
             self.state.game_state["attacked_player_id"] = None
-            print(f"DEBUG: Witch {pid} uses CURE potion")
+            # print(f"DEBUG: Witch {pid} uses CURE potion")
         elif action_type == "poison":
             if self.state.game_state["num_poisons"] <= 0:
                 fatal = self.state.set_invalid_move("You have no more Poison potions left.")
@@ -501,12 +501,12 @@ class WerewolfEnv(ta.Env):
             self.state.game_state["num_poisons"] -= 1
             self.state.game_state["poison_used"] = True
             self.state.game_state["poisoned_player_id"] = target
-            print(f"DEBUG: Witch {pid} uses POISON on Player {target}")
+            # print(f"DEBUG: Witch {pid} uses POISON on Player {target}")
         elif action_type == "no_action":
-            print(f"DEBUG: Witch {pid} chooses NO ACTION")
+            # print(f"DEBUG: Witch {pid} chooses NO ACTION")
 
     def _handle_day_discussion(self, pid: int, action: str):
-        print(f"DEBUG: Player {pid} says: \"{action}\"")
+        # print(f"DEBUG: Player {pid} says: \"{action}\"")
         self.state.add_observation(from_id=pid, message=action, observation_type=ta.ObservationType.PLAYER_ACTION)
 
     def _handle_day_vote(self, pid: int, action: str):
@@ -520,7 +520,7 @@ class WerewolfEnv(ta.Env):
                 self.state.made_invalid_move = False  # such that we can rotate off the player 
                 return
         self.state.game_state["day_votes"][pid] = target
-        print(f"DEBUG: Player {pid} votes for Player {target}")
+        # print(f"DEBUG: Player {pid} votes for Player {target}")
 
     def _after_player_action(self):
         if self.state.made_invalid_move: return
@@ -546,7 +546,7 @@ class WerewolfEnv(ta.Env):
             self._reset_round_state()
 
         # Advance to next phase
-        print(f"DEBUG: Phase transition to {self._compute_next_phase().value}")
+        # print(f"DEBUG: Phase transition to {self._compute_next_phase().value}")
         while True:
             self.phase = self._compute_next_phase()
             self.state.game_state["phase"] = self.phase
@@ -579,67 +579,69 @@ class WerewolfEnv(ta.Env):
             if self.player_roles[pid] == WEREWOLF_NAME:
                 alive_werewolves.append(pid)
         
-        print(f"DEBUG: Werewolf vote resolution:")
-        print(f"  - alive_werewolves: {alive_werewolves}")
-        print(f"  - all_werewolf_votes: {self.state.game_state['werewolf_votes']}")
+        # print(f"DEBUG: Werewolf vote resolution:")
+        # print(f"  - alive_werewolves: {alive_werewolves}")
+        # print(f"  - all_werewolf_votes: {self.state.game_state['werewolf_votes']}")
         
         # Count votes from alive werewolves only
         for voter_id, target_id in self.state.game_state["werewolf_votes"].items():
             if voter_id in alive_werewolves and target_id in self.state.game_state["alive_player_ids"]:
                 target_vote_counts[target_id] = target_vote_counts.get(target_id, 0) + 1
-                print(f"  - Valid vote: Werewolf {voter_id} votes for Player {target_id}")
+                # print(f"  - Valid vote: Werewolf {voter_id} votes for Player {target_id}")
             else:
-                print(f"  - Invalid vote: Werewolf {voter_id} votes for Player {target_id} (voter_alive: {voter_id in alive_werewolves}, target_alive: {target_id in self.state.game_state['alive_player_ids']})")
+                # print(f"  - Invalid vote: Werewolf {voter_id} votes for Player {target_id} (voter_alive: {voter_id in alive_werewolves}, target_alive: {target_id in self.state.game_state['alive_player_ids']})")
+                pass
         
-        print(f"  - target_vote_counts: {target_vote_counts}")
+        # print(f"  - target_vote_counts: {target_vote_counts}")
         
         # Check for unanimous consensus among alive werewolves
         if target_vote_counts and len(alive_werewolves) > 0:
             max_votes = max(target_vote_counts.values())
-            print(f"  - max_votes: {max_votes}, required_for_unanimity: {len(alive_werewolves)}")
+            # print(f"  - max_votes: {max_votes}, required_for_unanimity: {len(alive_werewolves)}")
             # Unanimous consensus: all alive werewolves must vote for the same target
             if max_votes == len(alive_werewolves):
                 # Find the target that received all votes
                 unanimous_targets = [target_id for target_id, vote_count in target_vote_counts.items() if vote_count == max_votes]
                 if len(unanimous_targets) == 1:
                     self.state.game_state["attacked_player_id"] = unanimous_targets[0]
-                    print(f"  - UNANIMOUS CONSENSUS: Attack Player {unanimous_targets[0]}")
+                    # print(f"  - UNANIMOUS CONSENSUS: Attack Player {unanimous_targets[0]}")
                 else:
                     # This shouldn't happen with unanimous voting, but handle it
                     self.state.game_state["attacked_player_id"] = None
-                    print(f"  - Multiple unanimous targets (shouldn't happen): {unanimous_targets}")
+                    # print(f"  - Multiple unanimous targets (shouldn't happen): {unanimous_targets}")
             else:
                 # No unanimous consensus - no attack
                 self.state.game_state["attacked_player_id"] = None
-                print(f"  - NO CONSENSUS: {max_votes}/{len(alive_werewolves)} werewolves agreed")
+                # print(f"  - NO CONSENSUS: {max_votes}/{len(alive_werewolves)} werewolves agreed")
         else:
             self.state.game_state["attacked_player_id"] = None
-            print(f"  - NO VOTES: No valid werewolf votes")
+            # print(f"  - NO VOTES: No valid werewolf votes")
 
     def _resolve_night_actions(self):
         attacked = self.state.game_state["attacked_player_id"]
         poisoned = self.state.game_state["poisoned_player_id"]
         
         # Debug: Print werewolf attack resolution
-        print(f"DEBUG: Werewolf attack resolution:")
-        print(f"  - attacked_player_id: {attacked}")
-        print(f"  - cure_used: {self.state.game_state['cure_used']}")
-        print(f"  - werewolf_votes: {self.state.game_state['werewolf_votes']}")
-        print(f"  - alive_werewolves: {[pid for pid in self.state.game_state['alive_player_ids'] if self.player_roles[pid] == WEREWOLF_NAME]}")
+        # print(f"DEBUG: Werewolf attack resolution:")
+        # print(f"  - attacked_player_id: {attacked}")
+        # print(f"  - cure_used: {self.state.game_state['cure_used']}")
+        # print(f"  - werewolf_votes: {self.state.game_state['werewolf_votes']}")
+        # print(f"  - alive_werewolves: {[pid for pid in self.state.game_state['alive_player_ids'] if self.player_roles[pid] == WEREWOLF_NAME]}")
         
         # Apply cure if used (prevents werewolf kill)
         if self.state.game_state["cure_used"]:
-            print(f"  - Cure was used, preventing werewolf attack on Player {attacked}")
+            # print(f"  - Cure was used, preventing werewolf attack on Player {attacked}")
             attacked = None
         
         if attacked is not None:
-            print(f"  - Werewolves successfully kill Player {attacked}")
+            # print(f"  - Werewolves successfully kill Player {attacked}")
             self._eliminate_player(attacked, "was killed by Werewolves during the night")
         else:
-            print(f"  - No werewolf kill this night")
+            # print(f"  - No werewolf kill this night")
+            pass
 
         if self.state.game_state["poison_used"] and poisoned is not None:
-            print(f"  - Witch poisons Player {poisoned}")
+            # print(f"  - Witch poisons Player {poisoned}")
             self._eliminate_player(poisoned, "was poisoned by the Witch during the night")
 
     def _resolve_day_vote(self):
@@ -648,7 +650,7 @@ class WerewolfEnv(ta.Env):
         for pid, target in self.state.game_state["day_votes"].items():
             vote_counts[target] = vote_counts.get(target, 0) + 1
         
-        print(f"DEBUG: Day vote results: {vote_counts}")
+        # print(f"DEBUG: Day vote results: {vote_counts}")
         
         if vote_counts:
             # Find the player with the most votes, with random tie-breaker
@@ -657,12 +659,12 @@ class WerewolfEnv(ta.Env):
             eliminated_player = random.choice(candidates)
             self.state.game_state["voted_player_id"] = eliminated_player
             
-            print(f"DEBUG: Player {eliminated_player} eliminated by vote ({max_votes} votes)")
+            # print(f"DEBUG: Player {eliminated_player} eliminated by vote ({max_votes} votes)")
             # Eliminate the player
             self._eliminate_player(eliminated_player, "was eliminated by village vote")
         else:
             self.state.game_state["voted_player_id"] = None
-            print(f"DEBUG: No votes cast")
+            # print(f"DEBUG: No votes cast")
         
     def _reset_round_state(self):
         self.state.game_state["cure_used"] = False
@@ -764,7 +766,7 @@ class WerewolfEnv(ta.Env):
             # Remove from next_player_ids queue if present
             if hasattr(self, 'next_player_ids') and pid in self.next_player_ids:
                 self.next_player_ids.remove(pid)
-            print(f"DEBUG: Player {pid} eliminated - {reason}")
+            # print(f"DEBUG: Player {pid} eliminated - {reason}")
             self.state.add_observation(message=f"Player {pid} {reason}.", observation_type=ta.ObservationType.GAME_MESSAGE)
             self._check_win()
 
@@ -772,8 +774,8 @@ class WerewolfEnv(ta.Env):
         alive = self.state.game_state["alive_player_ids"]
         werewolves = [p for p in alive if self.player_roles[p] == WEREWOLF_NAME]
         if not werewolves:
-            print(f"DEBUG: GAME OVER - Village wins! Werewolves eliminated: {[p for p in self.state.game_state['eliminated_player_ids'] if self.player_roles[p] == WEREWOLF_NAME]}")
+            # print(f"DEBUG: GAME OVER - Village wins! Werewolves eliminated: {[p for p in self.state.game_state['eliminated_player_ids'] if self.player_roles[p] == WEREWOLF_NAME]}")
             self.state.set_winners(player_ids=alive, reason="All Werewolves were eliminated. Village wins!")
         elif len(werewolves) >= len(alive) / 2:
-            print(f"DEBUG: GAME OVER - Werewolves win! Alive werewolves: {werewolves}, Total alive: {len(alive)}")
+            # print(f"DEBUG: GAME OVER - Werewolves win! Alive werewolves: {werewolves}, Total alive: {len(alive)}")
             self.state.set_winners(player_ids=werewolves, reason="Werewolves reached parity with villagers. Werewolves win!")
