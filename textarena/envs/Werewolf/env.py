@@ -12,68 +12,144 @@ MAX_PLAYERS = 15
 
 WEREWOLF_RULES = """
 You are playing Werewolf, a hidden-role social deduction game.
+WEREWOLF GAME RULES
 
-Players are divided into two sides:
-- Good: Villagers, Seer, and Witch
-- Evil: Werewolves
+The Werewolf game is a hidden-role social deduction game.
+Each player belongs to one of two sides:
+
+• The Good side: Villagers, Seer, Witch
+• The Evil side: Werewolves
 
 Only the Werewolves know who each other are.
-All other players do not know anyone's role.
+All other players know only their own role.
 
-Gameplay Overview
-Each round has two phases: Night and Day.
-The game alternates between these phases until one side wins.
+The game proceeds through alternating Night and Day phases.
+Each round has one Night phase and one Day phase.
+The game continues until one side wins.
 
 1. Night Phase
-At night, special roles secretly perform their actions in the following order:
-  a) Werewolves: Secretly agree on a target to eliminate.
-  b) Seer: Chooses one player to reveal (privately learns their role).
-  c) Witch: Learns who was attacked by the Werewolves.
-     - The Witch may use one **Cure** potion to save the attacked player (once per game).
-     - The Witch may use one **Poison** potion to eliminate any player (once per game).
-     - The Witch may also choose to do nothing.
 
-All night actions are hidden from the public.  
-Only the relevant players know their private information.
+During the Night, only players with special roles act.
+The sequence of actions is fixed and happens privately.
+
+Step 1. Werewolves act first.
+All Werewolves secretly agree on a single living target to eliminate.
+If they fail to agree, no one is killed that night.
+Their target is hidden from all other players except the Witch later.
+
+Step 2. The Seer acts next.
+The Seer privately selects one living player to inspect.
+The game reveals to the Seer whether that player is a Werewolf or not.
+This information is private and cannot be shared except through discussion during the Day.
+
+Step 3. The Witch acts last.
+The Witch learns who was attacked by the Werewolves.
+The Witch may use one of two potions:
+
+Cure potion: Save the attacked player from dying. This can be used once in the entire game.
+
+Poison potion: Eliminate any living player of their choice. This can also be used once in the entire game.
+The Witch can choose to do nothing.
+Both potions cannot be used on the same night.
+
+When the Night phase ends, the game records which players live or die and moves to the Day phase.
 
 2. Day Phase
-All surviving players wake up and discuss what happened.
-Players may accuse, defend, and reason to identify the Werewolves.
-All spoken messages during the day are broadcasted to everyone.
 
-After discussion, all living players must vote to eliminate one player.
-The player with the most votes is publicly executed and removed from the game.
+All surviving players wake up and discuss what happened.
+Players may speak freely, share theories, lie, or defend themselves.
+No player actions such as killing or revealing are allowed during discussion.
+
+After discussion, every living player must vote publicly for one player to eliminate.
+The player with the most votes is executed and removed from the game.
+If there is a tie, the engine may either execute no one or choose randomly; this rule must be consistent for the entire game.
+Dead players can no longer act, vote, or speak.
 
 3. Game Progression
-After the Day phase, the game proceeds to the next Night phase.
-Dead players can no longer act, speak, or vote.
 
-Win Conditions
-- **Good side wins** if all Werewolves are eliminated.
-- **Evil side wins** if the number of Werewolves is equal to or greater than the number of remaining non-Werewolves.
+After the Day phase, the next Night phase begins.
+The cycle of Night and Day repeats until a win condition is reached.
 
-Role Summary
-- **Villager:** No special abilities; participates in discussion and voting.
-- **Werewolf:** Knows other Werewolves; eliminates one player each night; may lie during the day.
-- **Seer:** Once per night, privately reveals the true role of one player.
-- **Witch:** Has one Cure potion (save someone) and one Poison potion (kill someone), usable during the night.
+4. Win Conditions
 
-IMPORTANT: Phase-Specific Action Restrictions
-You can ONLY perform the action corresponding to the current phase:
+Good side wins if all Werewolves have been eliminated.
+Evil side wins if the number of living Werewolves is equal to or greater than the number of living non-Werewolves.
 
-- **Werewolf-Vote Phase**: ONLY Werewolves can act. Use <kill>X</kill> to vote for a target.
-- **Seer-Reveal Phase**: ONLY the Seer can act. Use <reveal>X</reveal> to check a player's role.
-- **Witch-Choice Phase**: ONLY the Witch can act. Use <cure>X</cure> or <poison>X</poison> or <nothing></nothing>.
-- **Day-Discussion Phase**: ALL players can speak freely. NO voting or special actions allowed.
-- **Day-Vote Phase**: ALL players must vote. Use <vote>X</vote> format. NO discussion or special actions allowed.
+5. Role Descriptions and Behavioral Rules
 
-VIOLATION WARNING: Attempting to perform actions outside your phase or role will result in elimination!
+Villager:
+Has no special powers. Participates in discussion and daytime voting only.
 
-Notes:
-- Dead players cannot talk or act.
-- Werewolves must avoid revealing themselves through their speech.
-- The Seer and Witch should hide their identities to avoid being targeted.
-- All public speech is broadcasted to every active player.
+Werewolf:
+Knows all other Werewolves.
+Acts at night to collectively choose one target to eliminate.
+Must pretend to be innocent during the day to avoid detection.
+
+Seer:
+At night, may reveal the true alignment of one player.
+Must keep this information secret and use it strategically to influence votes without being exposed.
+
+Witch:
+Has one Cure potion and one Poison potion to use across the entire game.
+Learns the Werewolves’ target each night and may choose to save or kill someone.
+Must decide strategically when to use each potion.
+
+6. Rules on Information and Communication
+
+• All actions performed at night are private. Only the relevant player(s) are informed.
+• All speech during the day is public and heard by every living player.
+• Werewolves communicate secretly only during the Night phase.
+• The Seer and Witch should avoid revealing their identities to avoid being killed.
+• Dead players cannot act, vote, or communicate.
+
+7. Phase-Specific Action Restrictions
+
+Each role can only act during its designated phase.
+No player may act outside their allowed time.
+
+• During the Werewolf phase: Only Werewolves may choose a target.
+• During the Seer phase: Only the Seer may choose someone to reveal.
+• During the Witch phase: Only the Witch may decide to cure, poison, or do nothing.
+• During the Day discussion phase: All living players may talk, but no one may act.
+• During the Day vote phase: All living players must vote once, and no one may talk or perform special actions.
+
+Any attempt to act outside of your permitted phase or without authorization results in immediate elimination.
+
+8. Moderator and System Behavior
+
+• The game engine enforces phase transitions automatically.
+• The engine communicates only the information relevant to each role.
+• The engine announces deaths and public outcomes at the start of each Day.
+• The engine checks for win conditions after each Day and Night.
+
+9. Example Turn Summary (for reasoning)
+
+Night:
+
+Werewolves choose one player to attack.
+
+Seer chooses one player to inspect.
+
+Witch learns the attack target and optionally saves or poisons.
+Day:
+
+The game announces who died overnight.
+
+All living players discuss and then vote.
+
+The most-voted player dies.
+
+The next night begins.
+
+10. Behavioral Objective for the Agent
+
+Your objective depends on your role:
+
+If you are a Werewolf: survive and eliminate all non-Werewolves. Deceive others during the day to avoid discovery.
+
+If you are a Villager, Seer, or Witch: identify and eliminate all Werewolves through reasoning, communication, and strategic action.
+
+You must reason about hidden information, social cues, and game state to decide your next move.
 """
 
 VILLAGER_NAME = "Villager"
@@ -428,11 +504,11 @@ class WerewolfEnv(ta.Env):
         phase_dispatch[self.phase](pid, action)
         self._after_player_action() # rotate / advance phase
         return self.state.step(rotate_player=False)
-    
+
     def _handle_werewolf_discussion(self, pid: int, action: str):
         # Send message from current werewolf to all other werewolves
         alive_werewolves = [p for p in self.state.game_state["alive_player_ids"] if self.player_roles[p] == WEREWOLF_NAME]
-        # print(f"DEBUG: Werewolf {pid} says: \"{action}\"")
+        print(f"DEBUG: Werewolf {pid} says: \"{action}\"")
         for other_werewolf in alive_werewolves:
             if other_werewolf != pid:  # Don't send to self
                 self.state.add_observation(from_id=pid, to_id=other_werewolf, message=action, observation_type=ta.ObservationType.PLAYER_ACTION)
@@ -459,7 +535,7 @@ class WerewolfEnv(ta.Env):
                 self.state.made_invalid_move = False  # such that we can rotate off the player 
                 return
         self.state.game_state["revealed_player_ids"].append(target)
-        # print(f"DEBUG: Seer {pid} reveals Player {target}")
+        print(f"DEBUG: Seer {pid} reveals Player {target}")
 
     def _handle_witch_choice(self, pid: int, action: str):
         action_type, target = WerewolfParser.parse_witch_choice(action)
@@ -482,7 +558,7 @@ class WerewolfEnv(ta.Env):
             self.state.game_state["num_cures"] -= 1
             self.state.game_state["cure_used"] = True
             self.state.game_state["attacked_player_id"] = None
-            # print(f"DEBUG: Witch {pid} uses CURE potion")
+            print(f"DEBUG: Witch {pid} uses CURE potion")
         elif action_type == "poison":
             if self.state.game_state["num_poisons"] <= 0:
                 fatal = self.state.set_invalid_move("You have no more Poison potions left.")
@@ -501,13 +577,13 @@ class WerewolfEnv(ta.Env):
             self.state.game_state["num_poisons"] -= 1
             self.state.game_state["poison_used"] = True
             self.state.game_state["poisoned_player_id"] = target
-            # print(f"DEBUG: Witch {pid} uses POISON on Player {target}")
+            print(f"DEBUG: Witch {pid} uses POISON on Player {target}")
         elif action_type == "no_action":
-            # print(f"DEBUG: Witch {pid} chooses NO ACTION")
+            print(f"DEBUG: Witch {pid} chooses NO ACTION")
             pass
 
     def _handle_day_discussion(self, pid: int, action: str):
-        # print(f"DEBUG: Player {pid} says: \"{action}\"")
+        print(f"DEBUG: Player {pid} says: \"{action}\"")
         self.state.add_observation(from_id=pid, message=action, observation_type=ta.ObservationType.PLAYER_ACTION)
 
     def _handle_day_vote(self, pid: int, action: str):
@@ -521,7 +597,7 @@ class WerewolfEnv(ta.Env):
                 self.state.made_invalid_move = False  # such that we can rotate off the player 
                 return
         self.state.game_state["day_votes"][pid] = target
-        # print(f"DEBUG: Player {pid} votes for Player {target}")
+        print(f"DEBUG: Player {pid} votes for Player {target}")
 
     def _after_player_action(self):
         if self.state.made_invalid_move: return
@@ -539,7 +615,6 @@ class WerewolfEnv(ta.Env):
             case Phase.DAY_VOTE:
                 self._resolve_day_vote()
 
-        # Check if game has concluded
         if self.state.done: return
 
         # Reset round state after day vote (start of new round)
@@ -547,9 +622,9 @@ class WerewolfEnv(ta.Env):
             self._reset_round_state()
 
         # Advance to next phase
-        # print(f"DEBUG: Phase transition to {self._compute_next_phase().value}")
         while True:
             self.phase = self._compute_next_phase()
+            print(f"DEBUG: Phase transition to {self.phase.value}")
             self.state.game_state["phase"] = self.phase
             self._render_game_state()
             self._send_phase_prompts()
@@ -580,69 +655,68 @@ class WerewolfEnv(ta.Env):
             if self.player_roles[pid] == WEREWOLF_NAME:
                 alive_werewolves.append(pid)
         
-        # print(f"DEBUG: Werewolf vote resolution:")
-        # print(f"  - alive_werewolves: {alive_werewolves}")
-        # print(f"  - all_werewolf_votes: {self.state.game_state['werewolf_votes']}")
+        print(f"DEBUG: Werewolf vote resolution:")
+        print(f"  - alive_werewolves: {alive_werewolves}")
+        print(f"  - all_werewolf_votes: {self.state.game_state['werewolf_votes']}")
         
         # Count votes from alive werewolves only
         for voter_id, target_id in self.state.game_state["werewolf_votes"].items():
             if voter_id in alive_werewolves and target_id in self.state.game_state["alive_player_ids"]:
                 target_vote_counts[target_id] = target_vote_counts.get(target_id, 0) + 1
-                # print(f"  - Valid vote: Werewolf {voter_id} votes for Player {target_id}")
+                print(f"  - Valid vote: Werewolf {voter_id} votes for Player {target_id}")
             else:
-                # print(f"  - Invalid vote: Werewolf {voter_id} votes for Player {target_id} (voter_alive: {voter_id in alive_werewolves}, target_alive: {target_id in self.state.game_state['alive_player_ids']})")
+                print(f"  - Invalid vote: Werewolf {voter_id} votes for Player {target_id} (voter_alive: {voter_id in alive_werewolves}, target_alive: {target_id in self.state.game_state['alive_player_ids']})")
                 pass
         
-        # print(f"  - target_vote_counts: {target_vote_counts}")
+        print(f"  - target_vote_counts: {target_vote_counts}")
         
         # Check for unanimous consensus among alive werewolves
         if target_vote_counts and len(alive_werewolves) > 0:
             max_votes = max(target_vote_counts.values())
-            # print(f"  - max_votes: {max_votes}, required_for_unanimity: {len(alive_werewolves)}")
+            print(f"  - max_votes: {max_votes}, required_for_unanimity: {len(alive_werewolves)}")
             # Unanimous consensus: all alive werewolves must vote for the same target
             if max_votes == len(alive_werewolves):
                 # Find the target that received all votes
                 unanimous_targets = [target_id for target_id, vote_count in target_vote_counts.items() if vote_count == max_votes]
                 if len(unanimous_targets) == 1:
                     self.state.game_state["attacked_player_id"] = unanimous_targets[0]
-                    # print(f"  - UNANIMOUS CONSENSUS: Attack Player {unanimous_targets[0]}")
+                    print(f"  - UNANIMOUS CONSENSUS: Attack Player {unanimous_targets[0]}")
                 else:
-                    # This shouldn't happen with unanimous voting, but handle it
                     self.state.game_state["attacked_player_id"] = None
-                    # print(f"  - Multiple unanimous targets (shouldn't happen): {unanimous_targets}")
+                    print(f"  - Multiple unanimous targets (shouldn't happen): {unanimous_targets}")
             else:
                 # No unanimous consensus - no attack
                 self.state.game_state["attacked_player_id"] = None
-                # print(f"  - NO CONSENSUS: {max_votes}/{len(alive_werewolves)} werewolves agreed")
+                print(f"  - NO CONSENSUS: {max_votes}/{len(alive_werewolves)} werewolves agreed")
         else:
             self.state.game_state["attacked_player_id"] = None
-            # print(f"  - NO VOTES: No valid werewolf votes")
+            print(f"  - NO VOTES: No valid werewolf votes")
 
     def _resolve_night_actions(self):
         attacked = self.state.game_state["attacked_player_id"]
         poisoned = self.state.game_state["poisoned_player_id"]
         
         # Debug: Print werewolf attack resolution
-        # print(f"DEBUG: Werewolf attack resolution:")
-        # print(f"  - attacked_player_id: {attacked}")
-        # print(f"  - cure_used: {self.state.game_state['cure_used']}")
-        # print(f"  - werewolf_votes: {self.state.game_state['werewolf_votes']}")
-        # print(f"  - alive_werewolves: {[pid for pid in self.state.game_state['alive_player_ids'] if self.player_roles[pid] == WEREWOLF_NAME]}")
+        print(f"DEBUG: Werewolf attack resolution:")
+        print(f"  - attacked_player_id: {attacked}")
+        print(f"  - cure_used: {self.state.game_state['cure_used']}")
+        print(f"  - werewolf_votes: {self.state.game_state['werewolf_votes']}")
+        print(f"  - alive_werewolves: {[pid for pid in self.state.game_state['alive_player_ids'] if self.player_roles[pid] == WEREWOLF_NAME]}")
         
         # Apply cure if used (prevents werewolf kill)
         if self.state.game_state["cure_used"]:
-            # print(f"  - Cure was used, preventing werewolf attack on Player {attacked}")
+            print(f"  - Cure was used, preventing werewolf attack on Player {attacked}")
             attacked = None
         
         if attacked is not None:
-            # print(f"  - Werewolves successfully kill Player {attacked}")
+            print(f"  - Werewolves successfully kill Player {attacked}")
             self._eliminate_player(attacked, "was killed by Werewolves during the night")
         else:
-            # print(f"  - No werewolf kill this night")
+            print(f"  - No werewolf kill this night")
             pass
 
         if self.state.game_state["poison_used"] and poisoned is not None:
-            # print(f"  - Witch poisons Player {poisoned}")
+            print(f"  - Witch poisons Player {poisoned}")
             self._eliminate_player(poisoned, "was poisoned by the Witch during the night")
 
     def _resolve_day_vote(self):
@@ -651,7 +725,7 @@ class WerewolfEnv(ta.Env):
         for pid, target in self.state.game_state["day_votes"].items():
             vote_counts[target] = vote_counts.get(target, 0) + 1
         
-        # print(f"DEBUG: Day vote results: {vote_counts}")
+        print(f"DEBUG: Day vote results: {vote_counts}")
         
         if vote_counts:
             # Find the player with the most votes, with random tie-breaker
@@ -660,12 +734,12 @@ class WerewolfEnv(ta.Env):
             eliminated_player = random.choice(candidates)
             self.state.game_state["voted_player_id"] = eliminated_player
             
-            # print(f"DEBUG: Player {eliminated_player} eliminated by vote ({max_votes} votes)")
+            print(f"DEBUG: Player {eliminated_player} eliminated by vote ({max_votes} votes)")
             # Eliminate the player
             self._eliminate_player(eliminated_player, "was eliminated by village vote")
         else:
             self.state.game_state["voted_player_id"] = None
-            # print(f"DEBUG: No votes cast")
+            print(f"DEBUG: No votes cast")
         
     def _reset_round_state(self):
         self.state.game_state["cure_used"] = False
@@ -693,33 +767,44 @@ class WerewolfEnv(ta.Env):
     def _send_phase_prompts(self):
         gs = self.state.game_state
         player_ids = gs["alive_player_ids"]
-        self.next_player_ids: List[int] = []
+        self.next_player_ids = []
+
         match self.phase:
+
+            # Werewolf discussion
             case Phase.WEREWOLF_DISCUSSION:
                 message = (
-                    f"Night has fallen. Werewolves, discuss with other werewolves who you should kill. Reply only with what you want to say to the other werewolves. Don't reply with anything else."
-                )
-                werewolf_ids = [pid for pid in player_ids if self.player_roles[pid] == WEREWOLF_NAME]
-                for pid in werewolf_ids:
-                    self.state.add_observation(to_id=pid, message=message, observation_type=ta.ObservationType.GAME_MESSAGE)
-                self.next_player_ids = werewolf_ids
-            case Phase.WEREWOLF_VOTE:
-                message = (
-                    f"Night has fallen. Werewolves, secretly agree on one player to eliminate. "
-                    "Submit your kill target within <kill> tags, e.g. <kill>3</kill>."
+                    "Night has fallen. You are a Werewolf.\n" +
+                    "Talk privately with the other Werewolves to decide who to attack tonight.\n" +
+                    "Speak naturally like a human would, no more than 5 sentences. Do not vote or use tags in this phase."
                 )
                 werewolf_ids = [pid for pid in player_ids if self.player_roles[pid] == WEREWOLF_NAME]
                 for pid in werewolf_ids:
                     self.state.add_observation(to_id=pid, message=message, observation_type=ta.ObservationType.GAME_MESSAGE)
                 self.next_player_ids = werewolf_ids
 
+            # Werewolf vote
+            case Phase.WEREWOLF_VOTE:
+                message = (
+                    "Night action: Werewolves must now choose one living player to eliminate.\n" +
+                    "Reply only with your choice in this exact format: <kill>player_id</kill>\n" +
+                    "Example: <kill>3</kill>"
+                )
+                werewolf_ids = [pid for pid in player_ids if self.player_roles[pid] == WEREWOLF_NAME]
+                for pid in werewolf_ids:
+                    self.state.add_observation(to_id=pid, message=message, observation_type=ta.ObservationType.GAME_MESSAGE)
+                self.next_player_ids = werewolf_ids
+
+            # Seer reveal
             case Phase.SEER_REVEAL:
                 if SEER_NAME in gs["role_pids"]:
                     seer_pid = gs["role_pids"][SEER_NAME][0]
                     if seer_pid in gs["alive_player_ids"]:
                         message = (
-                            f"Night has fallen. Seer, choose one player to reveal. "
-                            "Submit your reveal within <reveal> tags, e.g. <reveal>3</reveal>."
+                            "Night action: You are the Seer.\n" +
+                            "Choose one living player to reveal their true role.\n" +
+                            "Reply only with your choice: <reveal>player_id</reveal>\n" +
+                            "Example: <reveal>2</reveal>"
                         )
                         self.state.add_observation(to_id=seer_pid, message=message, observation_type=ta.ObservationType.GAME_MESSAGE)
                         self.next_player_ids = [seer_pid]
@@ -727,36 +812,49 @@ class WerewolfEnv(ta.Env):
                         self.next_player_ids = []
                 else:
                     self.next_player_ids = []
+
+            # Witch choice
             case Phase.WITCH_CHOICE:
                 if WITCH_NAME in gs["role_pids"]:
                     witch_pid = gs["role_pids"][WITCH_NAME][0]
                     if witch_pid in gs["alive_player_ids"]:
                         message = (
-                             f"Night has fallen. Witch, choose your action: "
-                             "Use <cure></cure> to save the attacked player, <poison>X</poison> to poison player X, or <no_action></no_action> to do nothing."
-                         )
+                            "Night action: You are the Witch.\n" +
+                            "You know who was attacked. Choose one action:\n" +
+                            "- Save them: <cure></cure>\n" +
+                            "- Poison someone: <poison>player_id</poison>\n" +
+                            "- Do nothing: <no_action></no_action>\n" +
+                            "Example: <poison>4</poison>"
+                        )
                         self.state.add_observation(to_id=witch_pid, message=message, observation_type=ta.ObservationType.GAME_MESSAGE)
                         self.next_player_ids = [witch_pid]
                     else:
                         self.next_player_ids = []
                 else:
                     self.next_player_ids = []
+
+            # Day discussion
             case Phase.DAY_DISCUSSION:
                 message = (
-                     f"Day has broken. Discuss what happened during the night. Reply only with what you want to say to the other players. Don't reply with anything else."
-                 )
-                self.state.add_observation(to_id=-1, message=message, observation_type=ta.ObservationType.GAME_MESSAGE)
-                self.next_player_ids = random.sample(player_ids, len(player_ids))
-            case Phase.DAY_VOTE:
-                message = (
-                    f"Day has broken. Vote for the player to eliminate. "
-                    "Submit your vote within <vote> tags, e.g. <vote>3</vote>."
+                    "Day has broken. All players may now speak. All players can see the message you send now.\n" +
+                    "Discuss who you think the Werewolves are. Share suspicions or defend yourself.\n" +
+                    "Speak naturally like a human would, no more than 5 sentences. Do not vote or use action tags yet"
                 )
                 self.state.add_observation(to_id=-1, message=message, observation_type=ta.ObservationType.GAME_MESSAGE)
-                self.next_player_ids = random.sample(player_ids, len(player_ids))
+                self.next_player_ids = player_ids.copy()
+
+            # Day vote
+            case Phase.DAY_VOTE:
+                message = (
+                    "Voting time. Choose one player to eliminate.\n" +
+                    "Reply only with your vote in this format: <vote>player_id</vote>\n" +  
+                    "Example: <vote>5</vote>"
+                )
+                self.state.add_observation(to_id=-1, message=message, observation_type=ta.ObservationType.GAME_MESSAGE)
+                self.next_player_ids = player_ids.copy()
+
             case _:
                 raise RuntimeError("Unknown phase")
-
 
 
     def _eliminate_player(self, pid: int, reason: str):
@@ -767,7 +865,7 @@ class WerewolfEnv(ta.Env):
             # Remove from next_player_ids queue if present
             if hasattr(self, 'next_player_ids') and pid in self.next_player_ids:
                 self.next_player_ids.remove(pid)
-            # print(f"DEBUG: Player {pid} eliminated - {reason}")
+            print(f"DEBUG: Player {pid} eliminated - {reason}")
             self.state.add_observation(message=f"Player {pid} {reason}.", observation_type=ta.ObservationType.GAME_MESSAGE)
             self._check_win()
 
@@ -775,8 +873,8 @@ class WerewolfEnv(ta.Env):
         alive = self.state.game_state["alive_player_ids"]
         werewolves = [p for p in alive if self.player_roles[p] == WEREWOLF_NAME]
         if not werewolves:
-            # print(f"DEBUG: GAME OVER - Village wins! Werewolves eliminated: {[p for p in self.state.game_state['eliminated_player_ids'] if self.player_roles[p] == WEREWOLF_NAME]}")
+            print(f"DEBUG: GAME OVER - Village wins! Werewolves eliminated: {[p for p in self.state.game_state['eliminated_player_ids'] if self.player_roles[p] == WEREWOLF_NAME]}")
             self.state.set_winners(player_ids=alive, reason="All Werewolves were eliminated. Village wins!")
         elif len(werewolves) >= len(alive) / 2:
-            # print(f"DEBUG: GAME OVER - Werewolves win! Alive werewolves: {werewolves}, Total alive: {len(alive)}")
+            print(f"DEBUG: GAME OVER - Werewolves win! Alive werewolves: {werewolves}, Total alive: {len(alive)}")
             self.state.set_winners(player_ids=werewolves, reason="Werewolves reached parity with villagers. Werewolves win!")

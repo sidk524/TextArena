@@ -28,3 +28,4 @@ while not done:
 rewards, game_info = env.close()
 
 print(f"Game Info: {game_info}")
+
