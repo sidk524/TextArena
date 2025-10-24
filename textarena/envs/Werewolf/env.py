@@ -504,6 +504,7 @@ class WerewolfEnv(ta.Env):
             # print(f"DEBUG: Witch {pid} uses POISON on Player {target}")
         elif action_type == "no_action":
             # print(f"DEBUG: Witch {pid} chooses NO ACTION")
+            pass
 
     def _handle_day_discussion(self, pid: int, action: str):
         # print(f"DEBUG: Player {pid} says: \"{action}\"")
