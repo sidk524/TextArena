@@ -870,11 +870,12 @@ class WerewolfEnv(ta.Env):
             self._check_win()
 
     def _check_win(self):
-        alive = self.state.game_state["alive_player_ids"]
-        werewolves = [p for p in alive if self.player_roles[p] == WEREWOLF_NAME]
+        all_players = range(self.state.num_players)
+        werewolves = [p for p in all_players if self.player_roles[p] == WEREWOLF_NAME]
+        good_players = [p for p in all_players if self.player_roles[p] == VILLAGER_NAME or self.player_roles[p] == SEER_NAME or self.player_roles[p] == WITCH_NAME]
         if not werewolves:
-            print(f"DEBUG: GAME OVER - Village wins! Werewolves eliminated: {[p for p in self.state.game_state['eliminated_player_ids'] if self.player_roles[p] == WEREWOLF_NAME]}")
-            self.state.set_winners(player_ids=alive, reason="All Werewolves were eliminated. Village wins!")
-        elif len(werewolves) >= len(alive) / 2:
-            print(f"DEBUG: GAME OVER - Werewolves win! Alive werewolves: {werewolves}, Total alive: {len(alive)}")
-            self.state.set_winners(player_ids=werewolves, reason="Werewolves reached parity with villagers. Werewolves win!")
+            print(f"DEBUG: GAME OVER - Good players win! Werewolves eliminated: {[p for p in self.state.game_state['eliminated_player_ids'] if self.player_roles[p] == WEREWOLF_NAME]}")
+            self.state.set_winners(player_ids=good_players, reason="All Werewolves were eliminated. Good players win!")
+        elif len(werewolves) >= len(good_players) / 2:
+            print(f"DEBUG: GAME OVER - Werewolves win! Alive werewolves: {werewolves}, Total alive: {len(good_players)}")
+            self.state.set_winners(player_ids=werewolves, reason="Werewolves reached parity with good players. Werewolves win!")
