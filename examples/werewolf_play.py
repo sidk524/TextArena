@@ -3,17 +3,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import textarena as ta 
-
-K_FACTOR = 32
-
-elo_ratings = {
-  0: 1000,
-  1: 1000,
-  2: 1000,
-  3: 1000,
-  4: 1000,
-  5: 1000,
-}
+from elo.elo import initialize_elo, update_elo, get_elo
 
 def make_agents():
   return {
@@ -25,26 +15,12 @@ def make_agents():
     5: ta.agents.OpenRouterAgent(model_name="anthropic/claude-haiku-4.5"),
   }
 
-def update_elo(elo, rewards, game_info):
-  for pid, reward in rewards.items():
-    if pid not in elo:
-      continue
-    
-    actual_score = 1.0 if reward > 0 else 0.0
-    
-    other_players = [other_pid for other_pid in rewards.keys() if other_pid != pid]
-    if not other_players:
-      continue
-    
-    avg_opponent_rating = sum(elo[other_pid] for other_pid in other_players) / len(other_players)
-    expected_score = 1 / (1 + 10 ** ((avg_opponent_rating - elo[pid]) / 400))
-    
-    delta = K_FACTOR * (actual_score - expected_score)
-    elo[pid] = elo[pid] + delta
+agents = make_agents()
+initialize_elo(list(agents.keys()))
 
-print("Initial Elo ratings: ", elo_ratings)
+print(f"Initial Elo ratings: {get_elo()}")
+
 for game_idx in range(5):
-  agents = make_agents()
   print(f"Starting game {game_idx+1}...")
 
   env = ta.make(env_id="Werewolf-v0")
@@ -58,7 +34,10 @@ for game_idx in range(5):
 
   rewards, game_info = env.close()
   print(f"Game {game_idx+1} Rewards: {rewards}")
-  update_elo(elo_ratings, rewards, game_info)
-  print(f"Elo after Game {game_idx+1}: {elo_ratings}")
+  
+  # Update ELO - it now automatically loads from and saves to elo.json
+  update_elo("Werewolf-v0", agents, rewards)
+  print(f"Elo after Game {game_idx+1}: {get_elo()}")
 
-print(f"Final Elo Ratings: {elo_ratings}")
+print(f"Final Elo Ratings: {get_elo()}")
+
