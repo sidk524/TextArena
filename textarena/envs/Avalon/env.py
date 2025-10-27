@@ -14,7 +14,7 @@ DEFAULT_VOTE = "approve"
 DEFAULT_MISSION_ACTION = "success"
 
 AVALON_RULES = """
-Avalon is a hidden-role game with two sides.
+You are playing Avalon: The Resistance, a hidden-role social deduction game with two sides.
 
 Sides:
 • Good: Servant, Merlin, Percival
@@ -24,41 +24,41 @@ Hidden information:
 • Evil players know each other (except Oberon).
 • Good players know only their own role, with special role interactions defined below.
 
-Phases repeat in order: Discussion → Team Proposal → Voting → Mission (then repeat).
+Game phases repeat in order: Discussion → Team Proposal → Voting → Mission → Guess Merlin (then repeat).
 
-Discussion:
+Discussion Phase:
 • All players may speak publicly.
 • No voting or special actions are allowed in this phase.
 
-Team Proposal:
+Team Proposal Phase:
 • The current Leader proposes a mission team of the required size.
 • The proposal is public and must include exactly the required number of players.
 
-Voting:
+Voting Phase:
 • All players vote to approve or reject the proposed team.
 • Majority approval is required; if rejected, leadership passes to the next player.
 • If five consecutive proposals are rejected, Evil wins.
 
-Mission:
+Mission Phase:
 • Only approved team members secretly choose an action.
 • Good must choose Success; Evil may choose Success or Fail.
 • Actions are shuffled and revealed; identities of actions are hidden.
 • A mission passes if all actions are Success; otherwise it fails.
 • Some player-counts may require two Fails for Mission 4 to fail.
 
-Merlin guess (end condition):
+Guess Merlin Phase (end condition):
 • If Good reaches 3 mission successes and Merlin is in the game, Evil gets one guess at Merlin’s identity.
 • If Evil guesses correctly, Evil wins instead of Good.
 
 Win conditions:
-• Good wins with 3 successful missions and (if Merlin is present) Evil does not correctly guess Merlin.
-• Evil wins with 3 failed missions or by correctly guessing Merlin after Good reaches 3 successes.
+• Good wins if your team succeeds in 3 out of 5 missions and (if Merlin is present) Evil does not correctly guess Merlin.
+• Evil wins if your team fails 3 out of 5 missions or by correctly guessing Merlin after Good succeeds 3 out of 5 missions.
 
-Action restrictions:
-• During Discussion: talk only; no votes or special actions.
-• During Team Proposal: only the Leader proposes using the specified format.
-• During Voting: every player votes once per proposal.
-• During Mission: only team members submit actions.
+Action restrictions: 
+• During Discussion Phase: talk only; no votes or special actions.
+• During Team Proposal Phase: only the Leader proposes using the specified format.
+• During Voting Phase: every player votes once per proposal.
+• During Mission Phase: only team members submit actions.
 """
 
 SERVANT_NAME = "Servant"
@@ -448,15 +448,12 @@ class AvalonEnv(ta.Env):
 
     def _assign_roles(self, num_players: int, special_roles: Optional[Set[str]] = None):
         self.player_roles = {}
-        self.roles = {}                             
+        self.roles = {}
 
         role_pool = generate_roles(num_players, special_roles=special_roles)
         for pid, r_name in enumerate(role_pool):
             self.player_roles[pid] = r_name
             self.roles[pid] = Role.create(r_name)
-        
-        good_players = [pid for pid, role in self.player_roles.items() if role not in EVIL_NAMES]
-        evil_players = [pid for pid, role in self.player_roles.items() if role in EVIL_NAMES]
 
     def _prompt(self, player_id: int, game_state: dict) -> str:
         role_obj: Role = self.roles[player_id]
