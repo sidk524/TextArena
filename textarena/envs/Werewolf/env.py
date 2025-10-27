@@ -14,142 +14,41 @@ WEREWOLF_RULES = """
 You are playing Werewolf, a hidden-role social deduction game.
 WEREWOLF GAME RULES
 
-The Werewolf game is a hidden-role social deduction game.
-Each player belongs to one of two sides:
+Sides:
+• Good: Villager, Seer, Witch
+• Evil: Werewolves
 
-• The Good side: Villagers, Seer, Witch
-• The Evil side: Werewolves
+Hidden information:
+• Werewolves know the identities of all Werewolves.
+• Other players know only their own role.
 
-Only the Werewolves know who each other are.
-All other players know only their own role.
-
-The game proceeds through alternating Night and Day phases.
-Each round has one Night phase and one Day phase.
-The game continues until one side wins.
-
-1. Night Phase
-
-During the Night, only players with special roles act.
-The sequence of actions is fixed and happens privately.
-
-Step 1. Werewolves act first.
-All Werewolves secretly agree on a single living target to eliminate.
-If they fail to agree, no one is killed that night.
-Their target is hidden from all other players except the Witch later.
-
-Step 2. The Seer acts next.
-The Seer privately selects one living player to inspect.
-The game reveals to the Seer whether that player is a Werewolf or not.
-This information is private and cannot be shared except through discussion during the Day.
-
-Step 3. The Witch acts last.
-The Witch learns who was attacked by the Werewolves.
-The Witch may use one of two potions:
-
-Cure potion: Save the attacked player from dying. This can be used once in the entire game.
-
-Poison potion: Eliminate any living player of their choice. This can also be used once in the entire game.
-The Witch can choose to do nothing.
-Both potions cannot be used on the same night.
-
-When the Night phase ends, the game records which players live or die and moves to the Day phase.
-
-2. Day Phase
-
-All surviving players wake up and discuss what happened.
-Players may speak freely, share theories, lie, or defend themselves.
-No player actions such as killing or revealing are allowed during discussion.
-
-After discussion, every living player must vote publicly for one player to eliminate.
-The player with the most votes is executed and removed from the game.
-If there is a tie, the engine may either execute no one or choose randomly; this rule must be consistent for the entire game.
-Dead players can no longer act, vote, or speak.
-
-3. Game Progression
-
-After the Day phase, the next Night phase begins.
-The cycle of Night and Day repeats until a win condition is reached.
-
-4. Win Conditions
-
-Good side wins if all Werewolves have been eliminated.
-Evil side wins if the number of living Werewolves is equal to or greater than the number of living non-Werewolves.
-
-5. Role Descriptions and Behavioral Rules
-
-Villager:
-Has no special powers. Participates in discussion and daytime voting only.
-
-Werewolf:
-Knows all other Werewolves.
-Acts at night to collectively choose one target to eliminate.
-Must pretend to be innocent during the day to avoid detection.
-
-Seer:
-At night, may reveal the true alignment of one player.
-Must keep this information secret and use it strategically to influence votes without being exposed.
-
-Witch:
-Has one Cure potion and one Poison potion to use across the entire game.
-Learns the Werewolves’ target each night and may choose to save or kill someone.
-Must decide strategically when to use each potion.
-
-6. Rules on Information and Communication
-
-• All actions performed at night are private. Only the relevant player(s) are informed.
-• All speech during the day is public and heard by every living player.
-• Werewolves communicate secretly only during the Night phase.
-• The Seer and Witch should avoid revealing their identities to avoid being killed.
-• Dead players cannot act, vote, or communicate.
-
-7. Phase-Specific Action Restrictions
-
-Each role can only act during its designated phase.
-No player may act outside their allowed time.
-
-• During the Werewolf phase: Only Werewolves may choose a target.
-• During the Seer phase: Only the Seer may choose someone to reveal.
-• During the Witch phase: Only the Witch may decide to cure, poison, or do nothing.
-• During the Day discussion phase: All living players may talk, but no one may act.
-• During the Day vote phase: All living players must vote once, and no one may talk or perform special actions.
-
-Any attempt to act outside of your permitted phase or without authorization results in immediate elimination.
-
-8. Moderator and System Behavior
-
-• The game engine enforces phase transitions automatically.
-• The engine communicates only the information relevant to each role.
-• The engine announces deaths and public outcomes at the start of each Day.
-• The engine checks for win conditions after each Day and Night.
-
-9. Example Turn Summary (for reasoning)
+Phases repeat in order: Night → Day.
 
 Night:
+• Werewolves collectively select one living target to eliminate.
+• Seer selects one living player to reveal whether they are a Werewolf.
+• Witch learns the Werewolves’ target and may:
+  - Use Cure once in the game to save the attacked player.
+  - Use Poison once in the game to eliminate a living player.
+• Only one Witch potion may be used per night.
+• Night actions are private and performed only by the relevant roles.
 
-Werewolves choose one player to attack.
-
-Seer chooses one player to inspect.
-
-Witch learns the attack target and optionally saves or poisons.
 Day:
+• All living players may speak publicly.
+• All living players vote to eliminate one player. The most votes is eliminated.
+• Tie handling is consistent throughout the game (engine-defined).
+• Dead players cannot act, vote, or speak.
 
-The game announces who died overnight.
+Win conditions:
+• Good wins if all Werewolves are eliminated.
+• Evil wins if the number of living Werewolves is equal to or greater than the number of living non-Werewolves.
 
-All living players discuss and then vote.
-
-The most-voted player dies.
-
-The next night begins.
-
-10. Behavioral Objective for the Agent
-
-Your objective depends on your role:
-
-If you are a Werewolf: survive and eliminate all non-Werewolves. Deceive others during the day to avoid discovery.
-
-If you are a Villager, Seer, or Witch: identify and eliminate all Werewolves through reasoning, communication, and strategic action.
-
-You must reason about hidden information, social cues, and game state to decide your next move.
+Action restrictions:
+• Werewolves act only during Werewolf phases.
+• Seer acts only during Seer phases.
+• Witch acts only during Witch phases.
+• During Day discussion, no actions are taken.
+• During Day vote, each living player votes exactly once.
 """
 
 VILLAGER_NAME = "Villager"
@@ -164,23 +63,16 @@ GOOD_NAMES = {VILLAGER_NAME, SEER_NAME, WITCH_NAME}
 # Base role descriptions
 BASE_ROLE_DESCRIPTIONS = {
     VILLAGER_NAME: (
-        "A regular Villager with no special powers. "
-        "Participates in discussions and voting during the day to find and eliminate Werewolves."
+        "No special actions. Participates in day discussion and voting."
     ),
     WEREWOLF_NAME: (
-        "An Evil player who knows the other Werewolves. "
-        "Each night, the Werewolves secretly agree on one player to eliminate. "
-        "During the day, they must hide their identity and mislead others."
+        "Knows the other Werewolves. At night, Werewolves jointly choose one living target to eliminate."
     ),
     SEER_NAME: (
-        "A Good player with the ability to see the true identity of one player each night. "
-        "Uses this information to guide the village without revealing their role."
+        "At night, may reveal one living player to learn whether they are a Werewolf."
     ),
     WITCH_NAME: (
-        "A Good player with two potions usable at night: "
-        "one Cure potion to save a player targeted by the Werewolves (once per game), "
-        "and one Poison potion to eliminate a player of their choice (once per game). "
-        "Must decide wisely when to use these powers."
+        "At night, learns the Werewolves’ target; has one Cure (save the attacked player) and one Poison (eliminate a living player)."
     ),
 }
 
@@ -774,9 +666,9 @@ class WerewolfEnv(ta.Env):
             # Werewolf discussion
             case Phase.WEREWOLF_DISCUSSION:
                 message = (
-                    "Night has fallen. You are a Werewolf.\n" +
-                    "Talk privately with the other Werewolves to decide who to attack tonight.\n" +
-                    "Speak naturally like a human would, no more than 5 sentences. Do not vote or use tags in this phase."
+                    "Night: Werewolf discussion.\n" +
+                    "Private communication among Werewolves is allowed.\n" +
+                    "No actions in this phase."
                 )
                 werewolf_ids = [pid for pid in player_ids if self.player_roles[pid] == WEREWOLF_NAME]
                 for pid in werewolf_ids:
@@ -836,9 +728,9 @@ class WerewolfEnv(ta.Env):
             # Day discussion
             case Phase.DAY_DISCUSSION:
                 message = (
-                    "Day has broken. All players may now speak. All players can see the message you send now.\n" +
-                    "Discuss who you think the Werewolves are. Share suspicions or defend yourself.\n" +
-                    "Speak naturally like a human would, no more than 5 sentences. Do not vote or use action tags yet"
+                    "Day discussion.\n" +
+                    "All living players may speak publicly.\n" +
+                    "Do not vote or use action tags in this phase."
                 )
                 self.state.add_observation(to_id=-1, message=message, observation_type=ta.ObservationType.GAME_MESSAGE)
                 self.next_player_ids = player_ids.copy()
