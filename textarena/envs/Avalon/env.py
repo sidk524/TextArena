@@ -51,14 +51,18 @@ Guess Merlin Phase (end condition):
 • If Evil guesses correctly, Evil wins instead of Good.
 
 Win conditions:
-• Good wins if your team succeeds in 3 out of 5 missions and (if Merlin is present) Evil does not correctly guess Merlin.
-• Evil wins if your team fails 3 out of 5 missions or by correctly guessing Merlin after Good succeeds 3 out of 5 missions.
+- Good wins if they succeed in 3 out of 5 missions AND Merlin is not correctly guessed by Evil.
+- Evil wins if they fail 3 out of 5 missions OR if they correctly identify Merlin at the end.
 
 Action restrictions: 
 • During Discussion Phase: talk only; no votes or special actions.
 • During Team Proposal Phase: only the Leader proposes using the specified format.
 • During Voting Phase: every player votes once per proposal.
 • During Mission Phase: only team members submit actions.
+
+Notes:
+For the messages that are broadcasted to all players, you have to be careful what you say
+as all the other players will receive a message containing what you said
 """
 
 SERVANT_NAME = "Servant"
@@ -74,25 +78,27 @@ GOOD_NAMES = {SERVANT_NAME, MERLIN_NAME, PERCIVAL_NAME}
 
 BASE_ROLE_DESCRIPTIONS = {
     SERVANT_NAME: (
-        "No special abilities. Participates in discussion and voting."
+        "They have no special abilities."
     ),
     MERLIN_NAME: (
-        "Knows the Evil players (except Mordred if present). If Good reaches 3 successes, Evil gets one guess at Merlin."
+        "Secretly knows who all the Evil players are, except Mordred (if Mordred is in the game). "
+        "If Good wins, Evil has one chance to guess who Merlin is; if they guess correctly, Evil wins instead."
     ),
     PERCIVAL_NAME: (
-        "Sees Merlin. If Morgana is present, she also appears as Merlin."
+        "Knows who Merlin is. "
+        "If Morgana is in the game, she appears as Merlin, making it tricky to distinguish the real Merlin."
     ),
     MINION_NAME: (
-        "No special abilities. Participates in discussion and voting."
+        "They have no special abilities."
     ),
     MORGANA_NAME: (
         "Appears as Merlin to Percival."
     ),
     MORDRED_NAME: (
-        "Hidden from Merlin."
+        "Merlin cannot see that Mordred is an Evil player."
     ),
     OBERON_NAME: (
-        "Does not know the other Evil players, and they do not know Oberon."
+        "Does not know who the other Evil players are, and they do not know that Oberon is Evil."
     ),
 }
 
@@ -139,6 +145,7 @@ class Role:
         cls.name = cls.__name__
         cls.team = get_team(cls.name)
         cls.description = get_role_description(cls.name)
+
         Role._registry[cls.__name__] = cls
     
     @classmethod
@@ -448,7 +455,7 @@ class AvalonEnv(ta.Env):
 
     def _assign_roles(self, num_players: int, special_roles: Optional[Set[str]] = None):
         self.player_roles = {}
-        self.roles = {}
+        self.roles = {}                              # <- NEW
 
         role_pool = generate_roles(num_players, special_roles=special_roles)
         for pid, r_name in enumerate(role_pool):
@@ -473,11 +480,11 @@ class AvalonEnv(ta.Env):
         return self.state.step(rotate_player=False)
 
     def _after_player_action(self):
-        if self.state.made_invalid_move: return
+        if self.state.made_invalid_move: 
+            return
         # If players still queued, just rotate.
         if self.next_player_ids:
-            next_player = self.next_player_ids.pop()
-            self.state.manually_set_current_player_id(next_player)
+            self.state.manually_set_current_player_id(self.next_player_ids.pop())
             return
 
         # Phase complete ─ evaluate votes / killings, decide next phase, queue players
@@ -490,17 +497,17 @@ class AvalonEnv(ta.Env):
                 self._resolve_guess_merlin()
 
         # Check if game has concluded
-        if self.state.done: return
+        if self.state.done: 
+            return
 
         # Advance to next phase
-        next_phase = self._compute_next_phase()
-        self.phase = next_phase
+        old_phase = self.phase
+        self.phase = self._compute_next_phase()
         self.state.game_state["phase"] = self.phase
+        
         self._render_game_state()
         self._send_phase_prompts()
-        if self.next_player_ids:
-            next_player = self.next_player_ids.pop()
-            self.state.manually_set_current_player_id(next_player)
+        self.state.manually_set_current_player_id(self.next_player_ids.pop())
     
     def _vote_passed(self) -> bool:
         return is_team_proposal_passed(self.state.game_state["votes"])
@@ -531,14 +538,15 @@ class AvalonEnv(ta.Env):
         team_size = self._get_mission_team_size()
         base_phase_message = get_base_phase_message(self.phase, self.state.game_state["mission_index"], team_size=team_size)
         leader_pid = self.state.game_state["leader_pid"]
+        
         match self.phase:
             case Phase.DISCUSSION:
                 rounds = self.discussion_rounds
                 message = (
                     base_phase_message +
-                    f"Discussion Phase: Leader is Player {leader_pid}.\n" +
-                    f"Public discussion for {rounds} rounds.\n" +
-                    "No voting or special actions in this phase."
+                    f"Leader is Player {leader_pid}.\n"
+                    f"Discuss for {rounds} rounds, then the leader will propose a team that you will vote on. "
+                    f"Keep your discussions and reasoning concise - limit responses to no more than 3 sentences."
                 )
                 self.state.add_observation(to_id=-1, message=message, observation_type=ta.ObservationType.GAME_MESSAGE)
                 # Random discussion order which is fixed for each discussion round
@@ -547,10 +555,9 @@ class AvalonEnv(ta.Env):
             case Phase.TEAM_PROPOSAL:
                 message = (
                     base_phase_message +
-                    "Team Proposal Phase: You are the Leader.\n" +
-                    f"Propose a team of exactly {team_size} players.\n" +
-                    "Reply only in this format: <team>[player_ids]</team>\n" +
-                    f"Example: <team>{list(range(team_size))}</team>\n"
+                    "You are the leader, propose a team to send for this mission. "
+                    f"You must propose a team of {team_size} players in the form of a list of player ids within <team> tags"
+                    f"e.g. <team>{list(range(team_size))}</team>"
                 )
                 self.state.add_observation(to_id=leader_pid, message=message, observation_type=ta.ObservationType.GAME_MESSAGE)
                 self.next_player_ids = [leader_pid]
@@ -558,11 +565,9 @@ class AvalonEnv(ta.Env):
                 proposed_team = self.state.game_state["team_proposal"]
                 message = (
                     base_phase_message +
-                    f"Voting Phase: Leader {leader_pid} proposed the team: {proposed_team}\n" +
-                    "Vote to approve or reject this team.\n" +
-                    "Reply only in this format: <vote>approve</vote> or <vote>reject</vote>\n" +
-                    "Example: <vote>approve</vote>\n" +
-                    "A majority vote approves the proposal."
+                    f"Leader {leader_pid}. Proposed the team: {proposed_team}\n"
+                    "Vote whether to approve or reject the team"
+                    "Submit your vote within <vote> tags, e.g. <vote>approve</vote> or <vote>reject</vote>."
                 )
                 self.state.add_observation(to_id=-1, message=message, observation_type=ta.ObservationType.GAME_MESSAGE)
                 self.next_player_ids = random.sample(player_ids, len(player_ids))
@@ -570,10 +575,10 @@ class AvalonEnv(ta.Env):
                 mission_team = self.state.game_state["team_proposal"]
                 message = (
                     base_phase_message +
-                    f"Mission Phase: Team members: {mission_team}.\n" +
-                    "Good must send <action>success</action>. Evil may send <action>success</action> or <action>fail</action>.\n" +
-                    "Reply only with: <action>success</action> or <action>fail</action>\n" +
-                    "Actions are shuffled before reveal."
+                    f"You are on the mission team consisting of players {mission_team}. "
+                    "Choose whether to succeed or fail the mission. "
+                    "Good players must choose success; Evil players can choose either. "
+                    "Submit your action within <action> tags, e.g. <action>success</action> or <action>fail</action>."
                 )
                 for pid in mission_team:
                     self.state.add_observation(to_id=pid, message=message, observation_type=ta.ObservationType.GAME_MESSAGE)
@@ -582,9 +587,8 @@ class AvalonEnv(ta.Env):
                 evil_pids = [pid for pid, role in self.player_roles.items() if role in EVIL_NAMES]
                 message = (
                     base_phase_message +
-                    "Guess Merlin Phase: Evil has one guess at Merlin's identity.\n" +
-                    "Reply only in this format: <merlin_guess>player_id</merlin_guess>\n" +
-                    "Example: <merlin_guess>3</merlin_guess>"
+                    "Evil team, you have one chance to guess who Merlin is. "
+                    "Submit your guess within <merlin_guess> tags with the player id, e.g. <merlin_guess>3</merlin_guess>."
                 )
                 for pid in evil_pids:
                     self.state.add_observation(to_id=pid, message=message, observation_type=ta.ObservationType.GAME_MESSAGE)
@@ -608,8 +612,7 @@ class AvalonEnv(ta.Env):
         self._record_merlin_guess(pid, action)
 
     def _get_mission_team_size(self) -> int:
-        team_size = get_mission_team_size(self.state.num_players, self.state.game_state["mission_index"])
-        return team_size
+        return get_mission_team_size(self.state.num_players, self.state.game_state["mission_index"])
     
     def _is_valid_team_proposal(self, team_proposal: List[int]) -> bool:
         team = set(team_proposal)
@@ -619,13 +622,13 @@ class AvalonEnv(ta.Env):
     def _record_team_proposal(self, pid: int, action: str):
         team_proposal = AvalonParser.parse_team_proposal(action)
         if team_proposal is None or not self._is_valid_team_proposal(team_proposal):
-            fatal = self.state.set_invalid_move("Invalid team proposal")
+            fatal = self.state.set_invalid_move(f"Invalid team proposal: Team proposal must be in the form <team>{list(range(self._get_mission_team_size()))}</team>")
             if not fatal:
                 return
-            # Too many invalid attempts, use default team
+            
             team_size = self._get_mission_team_size()
-            team_proposal = list(range(team_size)) 
-
+            team_proposal = list(range(team_size))
+            self.state.made_invalid_move = False
         self.state.game_state["team_proposal"] = team_proposal
         self.state.add_observation(from_id=pid, message=action, observation_type=ta.ObservationType.PLAYER_ACTION)
     
@@ -637,6 +640,7 @@ class AvalonEnv(ta.Env):
                 return
             # Too many invalid votes, use default vote
             vote = DEFAULT_VOTE
+            self.state.made_invalid_move = False
 
         self.state.game_state["votes"][pid] = vote
         self.state.add_observation(from_id=pid, message=action, observation_type=ta.ObservationType.PLAYER_ACTION)
@@ -649,17 +653,19 @@ class AvalonEnv(ta.Env):
                 return
             # Too many invalid actions, use default action
             action = DEFAULT_MISSION_ACTION
+            self.state.made_invalid_move = False
 
         self.state.game_state["mission_actions"][pid] = action
     
     def _record_merlin_guess(self, pid: int, guess: str):
-        guess = AvalonParser.parse_merlin_guess(guess)
+        guess = AvalonParser.parse_merlin_guess()
         if guess is None:
             fatal = self.state.set_invalid_move("Merlin guess not in valid format")
             if not fatal:
                 return
             # Too many invalid guesses, guess random player
             guess = random.randint(0, self.state.num_players - 1)
+            self.state.made_invalid_move = False
 
         self.state.game_state["merlin_guesses"][pid] = guess
 
@@ -670,9 +676,6 @@ class AvalonEnv(ta.Env):
 
     def _resolve_votes(self):
         vote_passed = self._vote_passed()
-        votes = self.state.game_state["votes"]
-        approve_count = sum(1 for v in votes.values() if v == "approve")
-        reject_count = len(votes) - approve_count
         
         if not vote_passed:
             self._inc_consecutive_failed_team_proposals()
@@ -693,7 +696,6 @@ class AvalonEnv(ta.Env):
     
     def _resolve_mission_outcome(self):
         success = self._is_mission_success()
-        mission_actions = self.state.game_state["mission_actions"].copy()
         self.state.game_state["mission_actions"].clear()
         
         if success:
@@ -704,15 +706,13 @@ class AvalonEnv(ta.Env):
             message = "Mission Failed. At least one action was fail"
         self.state.add_observation(message=message, observation_type=ta.ObservationType.GAME_MESSAGE)
         self._inc_leader()
-        # Increment mission index after mission completion
-        self.state.game_state["mission_index"] += 1
 
     def _resolve_guess_merlin(self):
         target = tally_merlin_votes(self.state.game_state["merlin_guesses"])
         merlin_pid = self.state.game_state["role_pids"][MERLIN_NAME]
-        guesses = self.state.game_state["merlin_guesses"]
-        
+
         if target is None:
+
             self._set_good_winners(reason="No merlin guesses found. Good automatically wins.")
         elif target == merlin_pid:
             self._set_evil_winners(reason=f"Evil correctly guessed Merlin as Player {merlin_pid}")
@@ -825,6 +825,5 @@ def is_valid_team_proposal(team_proposal: List[int], num_players: int, mission_i
     return len(team) == team_size and 0 <= min(team) and max(team) < num_players
 
 def get_base_phase_message(phase: Phase, mission_index: int, team_size: int) -> str:
-    message = f"Mission: {mission_index + 1}, Team size for this mission: {team_size}\nPhase: {phase.value}\n"
-    return message
+    return f"Mission: {mission_index + 1}, Team size for this mission: {team_size}\nPhase: {phase.value}\n"
                 
