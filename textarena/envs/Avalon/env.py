@@ -14,46 +14,51 @@ DEFAULT_VOTE = "approve"
 DEFAULT_MISSION_ACTION = "success"
 
 AVALON_RULES = """
-You are playing Avalon: The Resistance, a hidden role deduction game.  
+You are playing Avalon: The Resistance, a hidden-role social deduction game with two sides.
 
-Players are divided into two sides:
-- Good: The Loyal Servants of Arthur
-- Evil: The Minions of Mordred
+Sides:
+• Good: Servant, Merlin, Percival
+• Evil: Minion, Morgana, Mordred, Oberon
 
-Only Evil players are told who each other are.
-Good players are not told the sides of other players.
+Hidden information:
+• Evil players know each other (except Oberon).
+• Good players know only their own role, with special role interactions defined below.
 
-Gameplay Rules
-1. Discussion
-Everyone has a chance to talk and discuss.
-During discussions, everything you say is automatically broadcasted to all players.
+Game phases repeat in order: Discussion → Team Proposal → Voting → Mission → Guess Merlin (then repeat).
 
-2. Team Proposal
-Each round, the Leader proposes a mission team of a certain size.  
-This team proposal is automatically broadcasted to all players.
+Discussion Phase:
+• All players may speak publicly.
+• No voting or special actions are allowed in this phase.
 
-3. Voting
-Everyone votes to approve or reject the team.
-A majority is required for the proposal to be accepted. 
-If the team is rejected, leadership passes to the next player, who proposes their own team.
-If five teams in a row are rejected, Evil automatically wins.
-Each vote is automatically broadcasted to all players.
+Team Proposal Phase:
+• The current Leader proposes a mission team of the required size.
+• The proposal is public and must include exactly the required number of players.
 
-4. Mission Phase
-If a team is approved, members of the team secretly decide whether the mission passes or fails.  
-  - Good players must choose “Success”  
-  - Evil players can choose either “Success” or “Fail”  
-The actions are shuffled then revealed, players do not know which actions other players chose.
-If all are Success, the mission passes.
-If there is at least one Fail, the mission fails.
-Certain missions may require two Fails to fail, depending on the number of players in the game. You will be told when missions require two Fails to fail.
+Voting Phase:
+• All players vote to approve or reject the proposed team.
+• Majority approval is required; if rejected, leadership passes to the next player.
+• If five consecutive proposals are rejected, Evil wins.
 
-The actions (success/fail) in the mission is broadcasted to all players.
-However, the actions are shuffled so you do not know which action came from which player
+Mission Phase:
+• Only approved team members secretly choose an action.
+• Good must choose Success; Evil may choose Success or Fail.
+• Actions are shuffled and revealed; identities of actions are hidden.
+• A mission passes if all actions are Success; otherwise it fails.
+• Some player-counts may require two Fails for Mission 4 to fail.
+
+Guess Merlin Phase (end condition):
+• If Good reaches 3 mission successes and Merlin is in the game, Evil gets one guess at Merlin’s identity.
+• If Evil guesses correctly, Evil wins instead of Good.
 
 Win conditions:
 - Good wins if they succeed in 3 out of 5 missions AND Merlin is not correctly guessed by Evil.
 - Evil wins if they fail 3 out of 5 missions OR if they correctly identify Merlin at the end.
+
+Action restrictions: 
+• During Discussion Phase: talk only; no votes or special actions.
+• During Team Proposal Phase: only the Leader proposes using the specified format.
+• During Voting Phase: every player votes once per proposal.
+• During Mission Phase: only team members submit actions.
 
 Notes:
 For the messages that are broadcasted to all players, you have to be careful what you say
@@ -475,7 +480,8 @@ class AvalonEnv(ta.Env):
         return self.state.step(rotate_player=False)
 
     def _after_player_action(self):
-        if self.state.made_invalid_move: return
+        if self.state.made_invalid_move: 
+            return
         # If players still queued, just rotate.
         if self.next_player_ids:
             self.state.manually_set_current_player_id(self.next_player_ids.pop())
@@ -491,11 +497,14 @@ class AvalonEnv(ta.Env):
                 self._resolve_guess_merlin()
 
         # Check if game has concluded
-        if self.state.done: return
+        if self.state.done: 
+            return
 
         # Advance to next phase
+        old_phase = self.phase
         self.phase = self._compute_next_phase()
         self.state.game_state["phase"] = self.phase
+        
         self._render_game_state()
         self._send_phase_prompts()
         self.state.manually_set_current_player_id(self.next_player_ids.pop())
@@ -529,14 +538,15 @@ class AvalonEnv(ta.Env):
         team_size = self._get_mission_team_size()
         base_phase_message = get_base_phase_message(self.phase, self.state.game_state["mission_index"], team_size=team_size)
         leader_pid = self.state.game_state["leader_pid"]
-
+        
         match self.phase:
             case Phase.DISCUSSION:
                 rounds = self.discussion_rounds
                 message = (
                     base_phase_message +
                     f"Leader is Player {leader_pid}.\n"
-                    f"Discuss for {rounds} rounds, then the leader will propose a team that you will vote on."
+                    f"Discuss for {rounds} rounds, then the leader will propose a team that you will vote on. "
+                    f"Keep your discussions and reasoning concise - limit responses to no more than 3 sentences."
                 )
                 self.state.add_observation(to_id=-1, message=message, observation_type=ta.ObservationType.GAME_MESSAGE)
                 # Random discussion order which is fixed for each discussion round
@@ -612,13 +622,13 @@ class AvalonEnv(ta.Env):
     def _record_team_proposal(self, pid: int, action: str):
         team_proposal = AvalonParser.parse_team_proposal(action)
         if team_proposal is None or not self._is_valid_team_proposal(team_proposal):
-            fatal = self.state.set_invalid_move("Invalid team proposal")
+            fatal = self.state.set_invalid_move(f"Invalid team proposal: Team proposal must be in the form <team>{list(range(self._get_mission_team_size()))}</team>")
             if not fatal:
                 return
-            # Too many invalid attempts, use default team
+            
             team_size = self._get_mission_team_size()
-            team_proposal = list(range(team_size)) 
-
+            team_proposal = list(range(team_size))
+            self.state.made_invalid_move = False
         self.state.game_state["team_proposal"] = team_proposal
         self.state.add_observation(from_id=pid, message=action, observation_type=ta.ObservationType.PLAYER_ACTION)
     
@@ -630,6 +640,7 @@ class AvalonEnv(ta.Env):
                 return
             # Too many invalid votes, use default vote
             vote = DEFAULT_VOTE
+            self.state.made_invalid_move = False
 
         self.state.game_state["votes"][pid] = vote
         self.state.add_observation(from_id=pid, message=action, observation_type=ta.ObservationType.PLAYER_ACTION)
@@ -642,6 +653,7 @@ class AvalonEnv(ta.Env):
                 return
             # Too many invalid actions, use default action
             action = DEFAULT_MISSION_ACTION
+            self.state.made_invalid_move = False
 
         self.state.game_state["mission_actions"][pid] = action
     
@@ -653,6 +665,7 @@ class AvalonEnv(ta.Env):
                 return
             # Too many invalid guesses, guess random player
             guess = random.randint(0, self.state.num_players - 1)
+            self.state.made_invalid_move = False
 
         self.state.game_state["merlin_guesses"][pid] = guess
 
@@ -663,6 +676,7 @@ class AvalonEnv(ta.Env):
 
     def _resolve_votes(self):
         vote_passed = self._vote_passed()
+        
         if not vote_passed:
             self._inc_consecutive_failed_team_proposals()
             self.state.add_observation(message="No consensus - the team proposal was not passed.", observation_type=ta.ObservationType.GAME_MESSAGE)
@@ -683,6 +697,7 @@ class AvalonEnv(ta.Env):
     def _resolve_mission_outcome(self):
         success = self._is_mission_success()
         self.state.game_state["mission_actions"].clear()
+        
         if success:
             self._inc_mission_successes()
             message = "Mission Succeeded. All actions were success."
@@ -695,7 +710,9 @@ class AvalonEnv(ta.Env):
     def _resolve_guess_merlin(self):
         target = tally_merlin_votes(self.state.game_state["merlin_guesses"])
         merlin_pid = self.state.game_state["role_pids"][MERLIN_NAME]
+
         if target is None:
+
             self._set_good_winners(reason="No merlin guesses found. Good automatically wins.")
         elif target == merlin_pid:
             self._set_evil_winners(reason=f"Evil correctly guessed Merlin as Player {merlin_pid}")
