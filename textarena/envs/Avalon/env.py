@@ -14,143 +14,51 @@ DEFAULT_VOTE = "approve"
 DEFAULT_MISSION_ACTION = "success"
 
 AVALON_RULES = """
-You are playing Avalon: The Resistance, a hidden-role social deduction game.
+Avalon is a hidden-role game with two sides.
 
-AVALON GAME RULES
+Sides:
+• Good: Servant, Merlin, Percival
+• Evil: Minion, Morgana, Mordred, Oberon
 
-The Avalon game is a hidden-role social deduction game.
-Each player belongs to one of two sides:
+Hidden information:
+• Evil players know each other (except Oberon).
+• Good players know only their own role, with special role interactions defined below.
 
-• The Good side: Loyal Servants of Arthur (including Merlin, Percival, and regular Servants)
-• The Evil side: Minions of Mordred (including Morgana, Mordred, Oberon, and regular Minions)
-
-Only the Evil players know who each other are.
-All Good players know only their own role, except for special role interactions.
-
-The game proceeds through alternating Discussion, Team Proposal, Voting, and Mission phases.
-Each round has one complete cycle of these phases.
-The game continues until one side wins.
-
-1. Discussion Phase
-
-During the Discussion phase, all players have a chance to talk and discuss strategy.
-Everything you say during discussions is automatically broadcasted to all players.
-Players may share theories, defend themselves, or try to influence others.
-No voting or special actions are allowed during discussion.
-
-2. Team Proposal Phase
-
-Each round, the current Leader proposes a mission team of a specific size.
-The team size varies by mission number and total players in the game.
-The team proposal is automatically broadcasted to all players.
-The Leader must choose exactly the required number of players for the mission.
-
-3. Voting Phase
-
-Everyone votes to approve or reject the proposed team.
-A majority vote is required for the proposal to be accepted.
-If the team is rejected, leadership passes to the next player clockwise.
-If five teams in a row are rejected, Evil automatically wins.
-Each vote is automatically broadcasted to all players.
-
-4. Mission Phase
-
-If a team is approved, only the team members secretly decide the mission outcome.
-Good players must choose "Success" - they cannot choose "Fail".
-Evil players can choose either "Success" or "Fail".
-The actions are shuffled and then revealed - players do not know which action came from which player.
-If all actions are Success, the mission passes.
-If there is at least one Fail, the mission fails.
-Certain missions may require two Fails to fail, depending on the number of players.
-
-The mission actions (success/fail) are broadcasted to all players.
-However, the actions are shuffled so you cannot determine which player chose which action.
-
-5. Game Progression
-
-After each mission, the next round begins with a new Discussion phase.
-Leadership rotates clockwise after each team proposal (whether accepted or rejected).
-The game continues until a win condition is reached.
-
-6. Win Conditions
-
-Good side wins if they succeed in 3 out of 5 missions AND Merlin is not correctly guessed by Evil.
-Evil side wins if they fail 3 out of 5 missions OR if they correctly identify Merlin at the end.
-
-7. Role Descriptions and Behavioral Rules
-
-Servant:
-A regular Good player with no special powers. Participates in discussions and voting to help Good succeed.
-
-Merlin:
-Knows who all the Evil players are, except Mordred (if Mordred is in the game).
-Must guide the Good team without revealing their identity.
-If Good wins, Evil has one chance to guess who Merlin is; if they guess correctly, Evil wins instead.
-
-Percival:
-Knows who Merlin is. If Morgana is in the game, she appears as Merlin, making it tricky to distinguish the real Merlin.
-Must use this information to help Good without exposing Merlin.
-
-Minion:
-A regular Evil player with no special powers. Participates in discussions and voting to help Evil succeed.
-
-Morgana:
-Appears as Merlin to Percival, creating confusion about who the real Merlin is.
-Must use this deception to mislead the Good team.
-
-Mordred:
-Merlin cannot see that Mordred is an Evil player.
-This makes Mordred particularly dangerous as they can operate without Merlin's knowledge.
-
-Oberon:
-Does not know who the other Evil players are, and they do not know that Oberon is Evil.
-This creates additional complexity for the Evil team coordination.
-
-8. Rules on Information and Communication
-
-• All speech during discussion is public and heard by every player.
-• Team proposals and votes are automatically broadcasted to all players.
-• Mission actions are revealed but shuffled so individual choices remain secret.
-• Evil players know each other's identities (except Oberon).
-• Good players must deduce Evil players through discussion and voting patterns.
-
-9. Phase-Specific Action Restrictions
-
-Each phase has specific allowed actions:
-
-• During Discussion: All players may talk, but no voting or special actions are allowed.
-• During Team Proposal: Only the Leader may propose a team using the specified format.
-• During Voting: All players must vote to approve or reject the team.
-• During Mission: Only team members may choose success or fail actions.
-
-Any attempt to act outside of your permitted phase results in an invalid move.
-
-10. Example Turn Summary (for reasoning)
+Phases repeat in order: Discussion → Team Proposal → Voting → Mission (then repeat).
 
 Discussion:
-All players discuss strategy and share theories.
+• All players may speak publicly.
+• No voting or special actions are allowed in this phase.
 
 Team Proposal:
-The Leader proposes a team of the required size.
+• The current Leader proposes a mission team of the required size.
+• The proposal is public and must include exactly the required number of players.
 
 Voting:
-All players vote to approve or reject the team.
+• All players vote to approve or reject the proposed team.
+• Majority approval is required; if rejected, leadership passes to the next player.
+• If five consecutive proposals are rejected, Evil wins.
 
-Mission (if approved):
-Team members secretly choose success or fail actions.
+Mission:
+• Only approved team members secretly choose an action.
+• Good must choose Success; Evil may choose Success or Fail.
+• Actions are shuffled and revealed; identities of actions are hidden.
+• A mission passes if all actions are Success; otherwise it fails.
+• Some player-counts may require two Fails for Mission 4 to fail.
 
-Results:
-Mission outcome is revealed and the next round begins.
+Merlin guess (end condition):
+• If Good reaches 3 mission successes and Merlin is in the game, Evil gets one guess at Merlin’s identity.
+• If Evil guesses correctly, Evil wins instead of Good.
 
-11. Behavioral Objective for the Agent
+Win conditions:
+• Good wins with 3 successful missions and (if Merlin is present) Evil does not correctly guess Merlin.
+• Evil wins with 3 failed missions or by correctly guessing Merlin after Good reaches 3 successes.
 
-Your objective depends on your role:
-
-If you are Good: succeed in 3 out of 5 missions while protecting Merlin's identity.
-
-If you are Evil: fail 3 out of 5 missions or correctly identify Merlin at the end.
-
-You must reason about hidden information, voting patterns, and team compositions to decide your next move.
+Action restrictions:
+• During Discussion: talk only; no votes or special actions.
+• During Team Proposal: only the Leader proposes using the specified format.
+• During Voting: every player votes once per proposal.
+• During Mission: only team members submit actions.
 """
 
 SERVANT_NAME = "Servant"
@@ -166,27 +74,25 @@ GOOD_NAMES = {SERVANT_NAME, MERLIN_NAME, PERCIVAL_NAME}
 
 BASE_ROLE_DESCRIPTIONS = {
     SERVANT_NAME: (
-        "They have no special abilities."
+        "No special abilities. Participates in discussion and voting."
     ),
     MERLIN_NAME: (
-        "Secretly knows who all the Evil players are, except Mordred (if Mordred is in the game). "
-        "If Good wins, Evil has one chance to guess who Merlin is; if they guess correctly, Evil wins instead."
+        "Knows the Evil players (except Mordred if present). If Good reaches 3 successes, Evil gets one guess at Merlin."
     ),
     PERCIVAL_NAME: (
-        "Knows who Merlin is. "
-        "If Morgana is in the game, she appears as Merlin, making it tricky to distinguish the real Merlin."
+        "Sees Merlin. If Morgana is present, she also appears as Merlin."
     ),
     MINION_NAME: (
-        "They have no special abilities."
+        "No special abilities. Participates in discussion and voting."
     ),
     MORGANA_NAME: (
         "Appears as Merlin to Percival."
     ),
     MORDRED_NAME: (
-        "Merlin cannot see that Mordred is an Evil player."
+        "Hidden from Merlin."
     ),
     OBERON_NAME: (
-        "Does not know who the other Evil players are, and they do not know that Oberon is Evil."
+        "Does not know the other Evil players, and they do not know Oberon."
     ),
 }
 
@@ -642,9 +548,8 @@ class AvalonEnv(ta.Env):
                 message = (
                     base_phase_message +
                     f"Discussion Phase: Leader is Player {leader_pid}.\n" +
-                    f"Discuss strategy for {rounds} rounds, then the leader will propose a team that you will vote on.\n" +
-                    "Share theories, defend yourself, or try to influence others.\n" +
-                    "Speak naturally like a human would, no more than 5 sentences. Do not vote or use action tags in this phase."
+                    f"Public discussion for {rounds} rounds.\n" +
+                    "No voting or special actions in this phase."
                 )
                 print(f"DEBUG: Discussion phase message sent to all players: {message}")
                 self.state.add_observation(to_id=-1, message=message, observation_type=ta.ObservationType.GAME_MESSAGE)
@@ -656,10 +561,9 @@ class AvalonEnv(ta.Env):
                 message = (
                     base_phase_message +
                     "Team Proposal Phase: You are the Leader.\n" +
-                    f"Propose a team of exactly {team_size} players to send on this mission.\n" +
-                    "Reply only with your team proposal in this exact format: <team>[player_ids]</team>\n" +
-                    f"Example: <team>{list(range(team_size))}</team>\n" +
-                    "Choose your team carefully - this will be voted on by all players."
+                    f"Propose a team of exactly {team_size} players.\n" +
+                    "Reply only in this format: <team>[player_ids]</team>\n" +
+                    f"Example: <team>{list(range(team_size))}</team>\n"
                 )
                 print(f"DEBUG: Team proposal message sent to Leader {leader_pid}: {message}")
                 self.state.add_observation(to_id=leader_pid, message=message, observation_type=ta.ObservationType.GAME_MESSAGE)
@@ -669,11 +573,10 @@ class AvalonEnv(ta.Env):
                 message = (
                     base_phase_message +
                     f"Voting Phase: Leader {leader_pid} proposed the team: {proposed_team}\n" +
-                    "Vote whether to approve or reject this team proposal.\n" +
-                    "Vote to approve or reject based on your role and what's going to help your team win.\n" +
-                    "Reply only with your vote in this exact format: <vote>approve</vote> or <vote>reject</vote>\n" +
+                    "Vote to approve or reject this team.\n" +
+                    "Reply only in this format: <vote>approve</vote> or <vote>reject</vote>\n" +
                     "Example: <vote>approve</vote>\n" +
-                    "A majority vote is required for the proposal to be accepted."
+                    "A majority vote approves the proposal."
                 )
                 print(f"DEBUG: Voting phase message sent to all players: {message}")
                 self.state.add_observation(to_id=-1, message=message, observation_type=ta.ObservationType.GAME_MESSAGE)
@@ -683,13 +586,10 @@ class AvalonEnv(ta.Env):
                 mission_team = self.state.game_state["team_proposal"]
                 message = (
                     base_phase_message +
-                    f"Mission Phase: You are on the mission team consisting of players {mission_team}.\n" +
-                    "Choose whether to succeed or fail the mission.\n" +
-                    "Good players must choose 'success' - they cannot choose 'fail'.\n" +
-                    "Evil players can choose either 'success' or 'fail'.\n" +
-                    "Reply only with your action in this exact format: <action>success</action> or <action>fail</action>\n" +
-                    "Example: <action>success</action>\n" +
-                    "Your action will be shuffled with other team members' actions before being revealed."
+                    f"Mission Phase: Team members: {mission_team}.\n" +
+                    "Good must send <action>success</action>. Evil may send <action>success</action> or <action>fail</action>.\n" +
+                    "Reply only with: <action>success</action> or <action>fail</action>\n" +
+                    "Actions are shuffled before reveal."
                 )
                 print(f"DEBUG: Mission phase message sent to team members {mission_team}: {message}")
                 for pid in mission_team:
@@ -700,11 +600,9 @@ class AvalonEnv(ta.Env):
                 evil_pids = [pid for pid, role in self.player_roles.items() if role in EVIL_NAMES]
                 message = (
                     base_phase_message +
-                    "Guess Merlin Phase: Evil team, you have one chance to guess who Merlin is.\n" +
-                    "If you guess correctly, Evil wins instead of Good.\n" +
-                    "Reply only with your guess in this exact format: <merlin_guess>player_id</merlin_guess>\n" +
-                    "Example: <merlin_guess>3</merlin_guess>\n" +
-                    "Choose carefully - this is your only opportunity to win by identifying Merlin."
+                    "Guess Merlin Phase: Evil has one guess at Merlin's identity.\n" +
+                    "Reply only in this format: <merlin_guess>player_id</merlin_guess>\n" +
+                    "Example: <merlin_guess>3</merlin_guess>"
                 )
                 print(f"DEBUG: Guess Merlin phase message sent to Evil players {evil_pids}: {message}")
                 for pid in evil_pids:
