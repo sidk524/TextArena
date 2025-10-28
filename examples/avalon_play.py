@@ -1,8 +1,3 @@
-""" A minimal script showing how to run textarena locally """
-
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import textarena as ta 
 

@@ -59,17 +59,16 @@ class ClipCharactersActionWrapper(ActionWrapper):
 
     def action(self, action: str) -> str:
         """
-        Returns the action without truncation.
+        Truncates the action to the maximum number of characters.
 
         Args:
             action (str): The original action.
 
         Returns:
-            str: The original action (no truncation).
+            str: The truncated action.
         """
-        #  if len(action) <= self.max_num_characters:
-        #     return action
-        # else:
-        #     # Truncate and return
-        #     return action[-self.max_num_characters:]
-        return action
+        if len(action) <= self.max_num_characters:
+            return action
+        else:
+            # Truncate and return
+            return action[-self.max_num_characters:]
