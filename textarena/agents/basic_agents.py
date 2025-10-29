@@ -44,7 +44,7 @@ class OpenRouterAgent(Agent):
         self.verbose = verbose 
         self.system_prompt = system_prompt
         self.kwargs = kwargs
-
+        
         try:
             from openai import OpenAI
             from openai._exceptions import OpenAIError

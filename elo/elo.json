@@ -1,1 +1,28 @@
-{"Avalon-v0": {"OpenRouterAgent:anthropic/claude-sonnet-4": 984.0578807775225, "OpenRouterAgent:openai/gpt-4.1": 1046.1385271503225, "OpenRouterAgent:google/gemini-2.5-flash": 1017.9734804791937, "OpenRouterAgent:openai/gpt-4": 1046.7103200524073, "OpenRouterAgent:meta-llama/llama-4-maverick:free": 1018.5497694666238, "OpenRouterAgent:anthropic/claude-haiku-4.5": 985.0596385908644}, "Werewolf-v0": {"OpenRouterAgent:anthropic/claude-sonnet-4": 1016.0, "OpenRouterAgent:openai/gpt-4.1": 984.1473612790712, "OpenRouterAgent:google/gemini-2.5-flash": 984.0013572475347, "OpenRouterAgent:openai/gpt-4": 1015.8540083540653, "OpenRouterAgent:meta-llama/llama-4-maverick:free": 984.0000251154992, "OpenRouterAgent:anthropic/claude-haiku-4.5": 983.8526640656005}}
+{
+  "Werewolf-v0": {
+    "OpenRouterAgent:anthropic/claude-sonnet-4": {
+      "mu": 15.09293087902712,
+      "sigma": 6.124023808901016
+    },
+    "OpenRouterAgent:openai/gpt-4.1": {
+      "mu": 18.551080822514155,
+      "sigma": 6.124023808901016
+    },
+    "OpenRouterAgent:google/gemini-2.5-flash": {
+      "mu": 17.391417481060607,
+      "sigma": 6.124023808901016
+    },
+    "OpenRouterAgent:openai/gpt-4": {
+      "mu": 8.75137324682367,
+      "sigma": 6.124023808901016
+    },
+    "OpenRouterAgent:meta-llama/llama-4-maverick:free": {
+      "mu": 34.916884709700206,
+      "sigma": 6.124023808901016
+    },
+    "OpenRouterAgent:anthropic/claude-haiku-4.5": {
+      "mu": 3.218075505275907,
+      "sigma": 6.124023808901016
+    }
+  }
+}

@@ -219,7 +219,6 @@ class Agent(ABC):
         """
         pass
 
-
     @property
     def id(self) -> str:
         """Unique identifier for this agent instance used in evaluation."""
