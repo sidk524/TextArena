@@ -9,12 +9,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 agents = {
-    0: ta.agents.OpenRouterAgent(model_name="anthropic/claude-sonnet-4"),
-    1: ta.agents.OpenRouterAgent(model_name="openai/gpt-4.1"),
-    2: ta.agents.OpenRouterAgent(model_name="google/gemini-2.5-flash"),
-    3: ta.agents.OpenRouterAgent(model_name="openai/gpt-4"),
-    4: ta.agents.OpenRouterAgent(model_name="meta-llama/llama-4-maverick:free"),
-    5: ta.agents.OpenRouterAgent(model_name="anthropic/claude-haiku-4.5"),
+    0: ta.agents.OpenRouterAgent(model_name="nvidia/nemotron-nano-12b-v2-vl:free"),
+    1: ta.agents.OpenRouterAgent(model_name="minimax/minimax-m2:free"),
+    2: ta.agents.OpenRouterAgent(model_name="alibaba/tongyi-deepresearch-30b-a3b:free"),
+    3: ta.agents.OpenRouterAgent(model_name="meituan/longcat-flash-chat:free"),
+    4: ta.agents.OpenRouterAgent(model_name="nvidia/nemotron-nano-9b-v2:free"),
+    5: ta.agents.OpenRouterAgent(model_name="deepseek/deepseek-chat-v3.1:free"),
   }
 
 def run_agent_modification_test(env_id, agents, testing_agent_index, num_games=2):
@@ -37,4 +37,4 @@ def run_test(env_id, agents, num_games=2):
   proposed_elo = apply_elo_algorithm(env_id, agents, results)
   save_elo(proposed_elo)
 
-run_test("Werewolf-v0", agents, 5)
+run_test("Werewolf-v0", agents, 100)
