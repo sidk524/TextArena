@@ -71,4 +71,4 @@ class ClipCharactersActionWrapper(ActionWrapper):
             return action
         else:
             # Truncate and return
-            return action[-self.max_num_characters:]
+            return action[-self.max_num_characters:] 
