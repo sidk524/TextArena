@@ -1,4 +1,5 @@
 """ A minimal script showing how to run textarena locally """
+
 import textarena as ta 
 
 
@@ -8,7 +9,6 @@ agents = {
     2: ta.agents.HumanAgent(),
     3: ta.agents.HumanAgent(),
     4: ta.agents.HumanAgent(),
-    5: ta.agents.HumanAgent(),
 }
 
 # initialize the environment
