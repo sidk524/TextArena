@@ -219,6 +219,13 @@ class Agent(ABC):
         """
         pass
 
+    @property
+    def id(self) -> str:
+        """Unique identifier for this agent instance used in evaluation."""
+        base = self.__class__.__name__
+        model = getattr(self, "model_name", getattr(self, "model_id", getattr(self, "model_path", "unknown")))
+        return f"{base}:{model}"
+
 
 class AgentWrapper(Agent):
     """ TODO """
