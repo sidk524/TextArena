@@ -7,6 +7,8 @@ checkpoints
 wandb
 *.out
 
+elo/elo.json
+
 ### DEFAULTS FROM GITHUB ###
 __pycache__/
 *.py[cod]
