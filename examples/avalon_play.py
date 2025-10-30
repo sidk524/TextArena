@@ -1,16 +1,15 @@
-
+""" A minimal script showing how to run textarena locally """
 import textarena as ta 
 
 
 agents = {
-    0: ta.agents.OpenRouterAgent(model_name="anthropic/claude-sonnet-4"),
-    1: ta.agents.OpenRouterAgent(model_name="openai/gpt-4.1"),
-    2: ta.agents.OpenRouterAgent(model_name="google/gemini-2.5-flash"),
-    3: ta.agents.OpenRouterAgent(model_name="openai/gpt-4.1"),
-    4: ta.agents.OpenRouterAgent(model_name="openai/gpt-4.1"),
-    5: ta.agents.OpenRouterAgent(model_name="anthropic/claude-haiku-4.5"),
+    0: ta.agents.HumanAgent(),
+    1: ta.agents.HumanAgent(),
+    2: ta.agents.HumanAgent(),
+    3: ta.agents.HumanAgent(),
+    4: ta.agents.HumanAgent(),
+    5: ta.agents.HumanAgent(),
 }
-
 
 # initialize the environment
 env = ta.make(env_id="Avalon-v0")
