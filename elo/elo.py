@@ -4,9 +4,9 @@ import copy
 from typing import Dict, List
 from trueskill import Rating, rate
 
-# TrueSkill default values (native scale)
-DEFAULT_MU = 25.0  # TrueSkill default mean skill rating
-DEFAULT_SIGMA = 25.0 / 3.0  # TrueSkill default uncertainty (~8.33)
+# TrueSkill default values 
+DEFAULT_MU = 25.0  
+DEFAULT_SIGMA = 25.0 / 3.0  
 
 # Get the directory where this file is located
 ELO_DIR = os.path.dirname(os.path.abspath(__file__))
