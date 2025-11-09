@@ -16,7 +16,7 @@ WEREWOLF GAME RULES
 
 Sides:
 • Good: Villager, Seer, Witch
-• Evil: Werewolves
+• Evil: Werewolves9
 
 Hidden information:
 • Werewolves know the identities of all Werewolves.
@@ -207,9 +207,9 @@ class Witch(Role):
             attacked_info = "No one was attacked by the Werewolves this night.\n"
         
         return base + (
-            f"You know who was attacked by the Werewolves each night:\n"
             f"{attacked_info}"
-            f"You have one Cure potion and one Poison potion. You can use them to save a player or kill a player {game_state['num_cures']} times and {game_state['num_poisons']} times respectively."
+            f"You have {game_state['num_cures']} Cure potion(s) and {game_state['num_poisons']} Poison potion(s). "
+            f"You can use a Cure potion to save a player or use a Poison potion to kill a player."
         )
     
 class WerewolfParser:
@@ -292,8 +292,6 @@ class GameState(TypedDict):
     revealed_player_ids: List[int]
     num_cures: int
     num_poisons: int
-    cure_used: bool
-    poison_used: bool
     werewolf_ratio: float
     werewolf_votes: Dict[int, int]
     day_votes: Dict[int, int]
@@ -315,8 +313,6 @@ def init_game_state(num_players: int, player_roles: Dict[int, str], werewolf_rat
         revealed_player_ids=[],
         num_cures=num_cures,
         num_poisons=num_poisons,
-        cure_used=False,
-        poison_used=False,
         werewolf_ratio=werewolf_ratio,
         werewolf_votes={},
         day_votes={},
@@ -457,7 +453,6 @@ class WerewolfEnv(ta.Env):
                     self.state.made_invalid_move = False  # such that we can rotate off the player 
                     return
             self.state.game_state["num_cures"] -= 1
-            self.state.game_state["cure_used"] = True
             self.state.game_state["attacked_player_id"] = None
         elif action_type == "poison":
             if self.state.game_state["num_poisons"] <= 0:
@@ -475,7 +470,6 @@ class WerewolfEnv(ta.Env):
                     self.state.made_invalid_move = False  # such that we can rotate off the player 
                     return
             self.state.game_state["num_poisons"] -= 1
-            self.state.game_state["poison_used"] = True
             self.state.game_state["poisoned_player_id"] = target
 
     def _handle_day_discussion(self, pid: int, action: str):
@@ -539,7 +533,7 @@ class WerewolfEnv(ta.Env):
 
     def _resolve_werewolf_vote(self):
         # Count votes from werewolves only
-        target_vote_counts = {}
+        target_vote_counts = defaultdict(int)
         alive_werewolves = []
         
         # Get all alive werewolves
@@ -550,7 +544,7 @@ class WerewolfEnv(ta.Env):
         # Count votes from alive werewolves only
         for voter_id, target_id in self.state.game_state["werewolf_votes"].items():
             if voter_id in alive_werewolves and target_id in self.state.game_state["alive_player_ids"]:
-                target_vote_counts[target_id] = target_vote_counts.get(target_id, 0) + 1
+                target_vote_counts[target_id] += 1
         
         # Check for unanimous consensus among alive werewolves
         if target_vote_counts and len(alive_werewolves) > 0:
@@ -574,20 +568,20 @@ class WerewolfEnv(ta.Env):
         poisoned = self.state.game_state["poisoned_player_id"]
         
         # Apply cure if used (prevents werewolf kill)
-        if self.state.game_state["cure_used"]:
+        if self.state.game_state["num_cures"] == 0:
             attacked = None
         
         if attacked is not None:
             self._eliminate_player(attacked, "was killed by Werewolves during the night")
 
-        if self.state.game_state["poison_used"] and poisoned is not None:
+        if self.state.game_state["num_poisons"] == 0 and poisoned is not None:
             self._eliminate_player(poisoned, "was poisoned by the Witch during the night")
 
     def _resolve_day_vote(self):
         # Count all day votes
-        vote_counts = {}
+        vote_counts = defaultdict(int)
         for pid, target in self.state.game_state["day_votes"].items():
-            vote_counts[target] = vote_counts.get(target, 0) + 1
+            vote_counts[target] += 1
         
         if vote_counts:
             # Find the player with the most votes, with random tie-breaker
@@ -602,8 +596,6 @@ class WerewolfEnv(ta.Env):
             self.state.game_state["voted_player_id"] = None
         
     def _reset_round_state(self):
-        self.state.game_state["cure_used"] = False
-        self.state.game_state["poison_used"] = False
         self.state.game_state["voted_player_id"] = None
         self.state.game_state["attacked_player_id"] = None
         self.state.game_state["werewolf_votes"] = {}
@@ -726,15 +718,15 @@ class WerewolfEnv(ta.Env):
             case _:
                 raise RuntimeError("Unknown phase")
 
-
     def _eliminate_player(self, pid: int, reason: str):
-        if pid in self.state.game_state["alive_player_ids"]:
-            self.state.game_state["alive_player_ids"].remove(pid)
-            # Remove from next_player_ids queue if present
-            if hasattr(self, 'next_player_ids') and pid in self.next_player_ids:
-                self.next_player_ids.remove(pid)
-            self.state.add_observation(message=f"Player {pid} {reason}.", observation_type=ta.ObservationType.GAME_MESSAGE)
-            self._check_win()
+        assert pid in self.state.game_state["alive_player_ids"], f"Attempted to eliminate player {pid} who is not alive"
+        self.state.game_state["alive_player_ids"].remove(pid)
+        # Remove from next_player_ids queue if present
+        if hasattr(self, 'next_player_ids') and pid in self.next_player_ids:
+            self.next_player_ids.remove(pid)
+        self.state.add_observation(message=f"Player {pid} {reason}.", observation_type=ta.ObservationType.GAME_MESSAGE)
+        self._check_win()
+
     def _check_win(self):
         all_players = range(self.state.num_players)
         werewolves = [p for p in all_players if self.player_roles[p] == WEREWOLF_NAME]
